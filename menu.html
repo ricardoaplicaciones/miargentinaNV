@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Argentina</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<style>
+    body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: white;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    text-align: center;
+}
+
+.logo-container {
+    margin-bottom: 20px;
+}
+
+.logo {
+    max-width: 100%;
+    height: auto;
+}
+
+.login-button {
+    background-color: #337ab7;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 15px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 300px;
+
+}
+
+.signup-container {
+    margin-top: 20px;
+}
+
+.signup-container p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.signup-button {
+    background-color: white;
+    color: #337ab7;
+    border: 1px solid #337ab7;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 300px;
+}
+
+</style>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="img/menu.PNG" alt="miArgentina" class="logo" style="padding-bottom: 110px;">
+        </div>
+        <button onclick="iniciarSesion()" class="login-button">Ingresar con mi cuenta</button>
+        <hr style="border-color:rgba(255, 255, 255, 0.5)">
+        <div class="signup-container">
+            <p style="font-weight: bold;font-size: 13px;">¿No tenés cuenta en Mi Argentina?</p>
+            <button onclick="crearCuenta()" class="signup-button">Crear una cuenta</button>
+        </div>
+    </div>
+    <script>
+        function crearCuenta() {
+            window.location.href = "registrarse.html"
+        }
+        function iniciarSesion() {
+            window.location.href = "iniciarSesion.html"
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+</head>
+<body>
+    <style> body {
+        font-family: "NombreDeTuFuente", sans-serif;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: normal;
+        height: 100vh;
+    }
+
+    #dni-container {
+position: relative;
+width: 400px; /* Tamaño fijo para la imagen */
+height: auto; /* Altura automática para mantener la proporción */
+margin: 0 auto; /* Centrar el contenedor */
+}
+
+
+    .dni-image {
+        width: 100%;
+        display: block;
+    }
+
+    #datos-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    #dni-form {
+        width: 100%;
+        box-sizing: border-box;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative; /* Asegura que el formulario este bien sobre la imagen */
+        z-index: 1; /* Asegura que el formulario esté arriba de la imagen */
+    }
+
+    #dni-form label, #dni-form input, #dni-form button {
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+    #canvas {
+  border: 4px solid black;
+}
+
+#controls {
+  margin-top: 10px;
+}
+.load{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);
+/*change these sizes to fit into your project*/
+width:100px;
+height:100px;
+}
+.load hr{border:0;margin:0;width:40%;height:40%;position:absolute;border-radius:50%;animation:spin 2s ease infinite}
+
+.load :first-child{background:#6dcfbd;animation-delay:-1.5s}
+.load :nth-child(2){background:#3af6e6;animation-delay:-1s}
+.load :nth-child(3){background:rgb(67, 225, 253);animation-delay:-0.5s}
+.load :last-child{background:#49a5c9}
+
+@keyframes spin{
+0%,100%{transform:translate(0)}
+25%{transform:translate(160%)}
+50%{transform:translate(160%, 160%)}
+75%{transform:translate(0, 160%)}
+}</style>
+
+
+
+<div id="dni-container" id="dni">
+    <section class="u-clearfix u-custom-color-3 Bu-section-1" id="sec-4c9c">
+      <div class="u-clearfix u-sheet Bu-sheet-1">
+        <img class="u-image u-image-default Bu-image-1" src="images/ultimaActualizacion.PNG" alt="" data-image-width="362" data-image-height="30">
+      </div>
+    </section>
+    <section class="u-clearfix Bu-section-2" id="sec-8eb5">
+      <div class="u-clearfix u-sheet Bu-sheet-1">
+        <div class ="tarjeta">
+          <img id="imagen1" class="u-image u-image-default Bu-image-1 dni-image" src="" data-image-width="900" data-image-height="578" onclick="cambiarImagen()">
+          <img id="imagen2" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/2.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen3" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/3.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen4" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/4.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen5" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/5.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen6" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/6.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen7" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/7.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen8" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/8.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen9" class="u-image u-image-default Bu-image-1 dni-image" src="dni360/9.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+          <img id="imagen10" class="u-image u-image-default Bu-image-1 dni-image" src=""  data-image-width="490" data-image-height="312" style="display: none;" onclick="cambiarImagen2()">
+        </div>
+        <img class="u-image u-image-contain u-image-default Bu-image-2" src="images/detallesdni.PNG" alt="" data-image-width="314" data-image-height="99">
+      </div>
+    </section>
+    </div>
+      <center> 
+      <h3 id="ver" style="visibility:hidden;" style="padding: 3%;">VERIFICAR QUE EL DNI ESTA BIEN. UNA VEZ CREADO NO SE PUEDE EDITAR (FOTO,FIRMA,DATOS)</h3>
+     <button id="ver2" style="visibility:hidden;" onclick="terminar()">TERMINAR DNI</button>
+</center>
+
+
+    <script>
+
+function urlImagenes() {
+  fetch('credenciales.json')
+    .then(response => response.json())
+    .then(config => {
+        const firebaseConfig = config;
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+
+        // Obtener el nombre de usuario del localStorage
+        var username = localStorage.getItem("mail");
+        var nombreArchivo1 = "dniFrente";
+        var nombreArchivo2 = "dniAtras";
+
+        // Obtener una referencia a la carpeta del usuario en Firebase Storage
+        const storageRef = firebase.storage().ref().child(username);
+
+        // Obtener las referencias de los dos archivos específicos
+        const archivoRef1 = storageRef.child(nombreArchivo1);
+        const archivoRef2 = storageRef.child(nombreArchivo2);
+
+        // Obtener las URLs de descarga de los archivos específicos
+        archivoRef1.getDownloadURL()
+          .then((url1) => {
+            console.log('URL del archivo 1:', url1);
+            document.getElementById("imagen1").src = url1;
+
+            // Aquí puedes utilizar la URL del primer archivo como lo necesites
+          })
+          .catch((error) => {
+            console.error('Error al obtener la URL del archivo 1:', error);
+          });
+
+        archivoRef2.getDownloadURL()
+          .then((url2) => {
+            console.log('URL del archivo 2:', url2);
+            document.getElementById("imagen10").src = url2;
+            // Aquí puedes utilizar la URL del segundo archivo como lo necesites
+            if (document.getElementById("imagen10").src == url2) {
+              document.getElementById("ver").style.visibility = "visible";      
+              setTimeout(function() {
+                document.getElementById("ver2").style.visibility = "visible";
+              }, 2000);
+            }
+
+          })
+          .catch((error) => {
+            console.error('Error al obtener la URL del archivo 2:', error);
+          });
+    })
+    .catch(error => {
+        console.error('Error al cargar la configuración de Firebase:', error);
+    });
+}
+
+// Llamar a la función con el nombre de usuario y los nombres de los archivos deseados
+urlImagenes();
+
+
+        var imagenes = ['imagen1', 'imagen2', 'imagen3','imagen4', 'imagen5','imagen6', 'imagen7','imagen8', 'imagen9','imagen10'];
+var indiceActual = 0;
+var tiempoEspera = 14; // en milisegundos
+var primVez = true;
+
+
+var startX, startY;
+var lastChangeTime = 0; // variable para guardar el tiempo de la última llamada a cambiarImagen3()
+
+function handleTouchStart(event) {
+  startX = event.touches[0].pageX;
+  startY = event.touches[0].pageY;
+  }
+
+function handleTouchMove3(event) {
+  var currentTime = new Date().getTime(); // obtener el tiempo actual
+  if (currentTime - lastChangeTime < 100) { // no llamar a cambiarImagen3() si han pasado menos de 500 milisegundos
+    return;
+  }
+  lastChangeTime = currentTime; // actualizar el tiempo de la última llamada
+  var touchX = event.touches[0].pageX;
+  var touchY = event.touches[0].pageY;
+  var deltaX = startX - touchX;
+  var deltaY = startY - touchY;
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (deltaX > 20 ) {
+      cambiarImagen();
+
+    }
+  }
+}
+function handleTouchMove4(event) {
+  var currentTime = new Date().getTime(); // obtener el tiempo actual
+  if (currentTime - lastChangeTime < 400) { // no llamar a cambiarImagen3() si han pasado menos de 500 milisegundos
+    return;
+  }
+  lastChangeTime = currentTime; // actualizar el tiempo de la última llamada
+  var touchX = event.touches[0].pageX;
+  var touchY = event.touches[0].pageY;
+  var deltaX = startX - touchX;
+  var deltaY = startY - touchY;
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (deltaX<20) {
+      cambiarImagen2();
+    }
+  }
+}
+
+var myImage3 = document.getElementById("imagen1");
+      myImage3.addEventListener("touchstart", handleTouchStart, false);
+      myImage3.addEventListener("touchmove", handleTouchMove3, false);
+
+      var myImage4 = document.getElementById("imagen10");
+      myImage4.addEventListener("touchstart", handleTouchStart, false);
+      myImage4.addEventListener("touchmove", handleTouchMove4, false);
+
+
+
+function cambiarImagen() {
+  if (indiceActual < imagenes.length) {
+    document.getElementById(imagenes[indiceActual]).style.display = 'none'; // ocultar la imagen actual
+    indiceActual++;
+    if (indiceActual == imagenes.length) {
+    document.getElementById(imagenes[imagenes.length-1]).style.display = 'inline'; // mostrar la siguiente imagen
+    return; // detener la secuencia si se llegó al final
+    }
+  document.getElementById(imagenes[indiceActual]).style.display = 'inline'; // mostrar la siguiente imagen
+  setTimeout(cambiarImagen, tiempoEspera);
+  } 
+}
+
+
+function cambiarImagen2() {
+  if (primVez==true) {
+  indiceActual = imagenes.length - 1;
+    primVez = false;
+  }
+  document.getElementById(imagenes[indiceActual]).style.display = 'none';
+  indiceActual--;
+  if (indiceActual < 0) {
+    document.getElementById(imagenes[0]).style.display = 'inline'; // mostrar la siguiente imagen
+    indiceActual= 0;
+    primVez = true;
+    return; // detener la secuencia si se llegó al final
+
+  }
+  document.getElementById(imagenes[indiceActual]).style.display = 'inline';
+  setTimeout(cambiarImagen2, tiempoEspera);
+}
+
+
+
+  function terminar() {
+    window.location.href = "index.html";
+  }
+
+
+    </script>
+</body>
+</html>

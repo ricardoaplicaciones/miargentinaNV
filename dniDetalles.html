@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNI Digital Header</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+</head>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        background-color: #337ab7;
+        padding: 10px;
+        color: white;
+        justify-content: space-between;
+        height: 40px;
+        border-bottom-left-radius: 13px;
+        border-bottom-right-radius: 13px;
+    }
+
+    .icon {
+        font-size: 24px;
+    }
+
+    .title {
+        font-size: 20px;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    .icon-img {
+        width: 45px;
+        height: 45px;
+    }
+
+    .card {
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 340px;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .img2 {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .card-details {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    .card-details .row {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .card-details .column {
+        flex: 50%;
+        text-align: left;
+    }
+
+    .card-details p {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .card-actions {
+        display: flex;
+        justify-content: space-around;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .card-actions:first-of-type {
+        padding-top: 0;
+        margin-top: 0;
+    }
+
+    .action {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        margin: 10px 0;
+    }
+
+    .action-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 5px;
+    }
+
+    .action span {
+        font-size: 15px;
+        color: black;
+    }
+
+    .footer {
+        background-color: white;
+        padding: 10px 0px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid #ccc;
+    }
+
+    .footer img {
+        width: 40px;
+        height: 40px;
+    }
+    .loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #337ab7;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin-top: 100px;
+    }
+
+    @keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+    } 
+</style>
+<body>
+<header class="header">
+    <span onclick="atras()" class="icon">&larr;</span>
+    <span class="title">DNI Digital</span>
+    <img src="img/refresh.png" alt="Refresh" class="icon-img">
+</header>
+<div id="cardEntera" style="display: none;">
+    <center style="padding-top: 20px;">
+    <div class="card">
+        <div class="card-image">
+            <img id="img2" style="width: 60px; border-radius: 100px;" src="img/user.png" alt="User Image">
+            <br>
+            <br>
+            <img style="width: 120px;" src="img/qr2.jpg" alt="User Image">
+        </div>
+        <div class="card-details">
+            <div class="row">
+                <div class="column">
+                    <p>DNI</p>
+                    <strong><p id="dni"></p></strong>
+                </div>
+                <div class="column">
+                    <p>Número de trámite</p>
+                    <strong><p id="tramite"></p></strong>
+                </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <p>Número de emision</p>
+                    <strong><p id="emision"></p></strong>
+                </div>
+                <div class="column">
+                    <p>Fecha de vencimiento</p>
+                    <strong><p id="vencimiento"></p></strong>
+                </div>
+            </div>
+            <hr>
+
+            <p >Nombre<br><strong id="nombre"></strong></p>
+            <p >Apellido<br><strong id="apellido"></strong></p>
+            <p >Sexo<br><strong id="sexo"> </strong></p>
+            <p >Fecha de nacimiento<br><strong id="nacimiento"> </strong></p>
+            <p >Nacionalidad<br><strong id="nacionalidad">ARG </strong></p>
+            <p >Domicilio<br><strong id="domicilio"></strong></p>
+        </div>
+    </div>
+    </center>
+</div>
+
+<center><span id="loader" class="loader"></span></center>
+
+<div class="footer">
+    <img  src="img/inicio.PNG" alt="Inicio">
+    <img style="width: 60px; height: 43px;" src="img/novedades.PNG" alt="Novedades">
+    <img style="width: 50px;" src="img/telefonos.PNG" alt="Teléfonos">
+    <img src="img/tina.PNG" alt="Tina">
+</div>
+
+<script>
+    function atras() {
+        window.location.href = "dni.html"
+    }
+    function inicializarFirebaseYRealizarOperaciones() {
+    fetch('credenciales.json')
+        .then(response => response.json())
+        .then(config => {
+            const firebaseConfig = config;
+            // Inicializar Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            const storage = firebase.storage();
+            const db = firebase.firestore(app);
+
+            // Obtener el email del usuario
+            const email = localStorage.getItem('mail');
+            if (!email) {
+                console.error('No se encontró el email del usuario en el localStorage.');
+                return;
+            }
+
+            // Obtener datos del usuario desde Firestore
+            db.collection("Usuarios").doc(email).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+
+                        document.getElementById("nombre").innerHTML = userData.Datos.nombre.toUpperCase();
+                        document.getElementById("domicilio").innerHTML = userData.Datos.domicilio.toUpperCase();
+                        document.getElementById("nacimiento").innerHTML = convertDateString(userData.Datos.nacimiento);
+                        document.getElementById("sexo").innerHTML = userData.Datos.sexo.toUpperCase();
+                        document.getElementById("apellido").innerHTML = userData.Datos.apellido.toUpperCase();
+                        document.getElementById("dni").innerHTML = userData.Datos.dni.toUpperCase();
+                        document.getElementById("tramite").innerHTML = userData.Datos.tramite.toUpperCase();
+                        document.getElementById("emision").innerHTML = convertDateString(userData.Datos.emision);
+                        document.getElementById("vencimiento").innerHTML = convertDateString(userData.Datos.vencimiento);
+                        terminoCargar();
+                    } else {
+                        console.log("No se encontró el documento del usuario.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al obtener los datos del usuario:", error);
+                });
+
+            // Obtener URLs de las imágenes desde Firebase Storage
+            var nombreArchivo1 = "fotoPerfil";
+            var nombreArchivo2 = "dniAtras";
+            const storageRef = storage.ref().child(email);
+
+            const archivoRef1 = storageRef.child(nombreArchivo1);
+            const archivoRef2 = storageRef.child(nombreArchivo2);
+
+            archivoRef1.getDownloadURL()
+                .then((url1) => {
+                    console.log('URL del archivo 1:', url1);
+                    document.getElementById("img2").src = url1;
+                })
+                .catch((error) => {
+                    console.error('Error al obtener la URL del archivo 1:', error);
+                    archivoRef1.parent.child("fotoPerfil.png").getDownloadURL()
+                        .then((fallbackUrl1) => {
+                            console.log('URL del archivo 1 (fallback):', fallbackUrl1);
+                            document.getElementById("img2").src = fallbackUrl1;
+                        })
+                        .catch((fallbackError1) => {
+                            console.error('Error al obtener la URL del archivo 1 (fallback):', fallbackError1);
+                        });
+                });
+
+            archivoRef2.getDownloadURL()
+                .then((url2) => {
+                    console.log('URL del archivo 2:', url2);
+                    document.getElementById("imagen10").src = url2;
+                })
+                .catch((error) => {
+                    console.error('Error al obtener la URL del archivo 2:', error);
+                });
+        })
+        .catch(error => {
+            console.error('Error al cargar la configuración de Firebase:', error);
+        });
+}
+function convertDateString(dateString) {
+    const months = {
+        "ENE": "01", "FEB": "02", "MAR": "03", "ABR": "04", "MAY": "05", "JUN": "06",
+        "JUL": "07", "AGO": "08", "SEP": "09", "OCT": "10", "NOV": "11", "DIC": "12"
+    };
+    
+    // Split the input string
+    const parts = dateString.split(' ');
+    
+    // Extract day, month, and year
+    const day = parts[0];
+    const month = months[parts[1].substring(0, 3).toUpperCase()];
+    const year = parts[2];
+    
+    // Concatenate in the desired format
+    return year + month + day.padStart(2, '0');
+}
+inicializarFirebaseYRealizarOperaciones();
+function terminoCargar() {
+            document.getElementById("cardEntera").style.display = "block";
+            document.getElementById("loader").style.display = "none";
+        }
+</script>
+
+</body>
+</html>

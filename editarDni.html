@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de DNI</title>
+    <link rel="stylesheet" href="https://use.typekit.net/hdq5bvf.css">    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+
+    <style>
+@font-face {
+  font-family: 'NombreDeTuFuente'; 
+  src: url('NimbusSanL-Reglta.otf') format('opentype');
+}
+
+
+        body {
+            font-family: "NombreDeTuFuente", sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: normal;
+            height: 100vh;
+        }
+
+        #dni-container {
+    position: relative;
+    width: 400px; /* Tamaño fijo para la imagen */
+    height: auto; /* Altura automática para mantener la proporción */
+    margin: 0 auto; /* Centrar el contenedor */
+}
+
+
+        #dni-image {
+            width: 100%;
+            display: block;
+        }
+
+        #datos-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #dni-form {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative; /* Asegura que el formulario este bien sobre la imagen */
+            z-index: 1; /* Asegura que el formulario esté arriba de la imagen */
+        }
+
+        #dni-form label, #dni-form input, #dni-form button {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        #canvas {
+      border: 4px solid black;
+    }
+    
+    #controls {
+      margin-top: 10px;
+    }
+    .load{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);
+  /*change these sizes to fit into your project*/
+  width:100px;
+  height:100px;
+}
+.load hr{border:0;margin:0;width:40%;height:40%;position:absolute;border-radius:50%;animation:spin 2s ease infinite}
+
+.load :first-child{background:#6dcfbd;animation-delay:-1.5s}
+.load :nth-child(2){background:#3af6e6;animation-delay:-1s}
+.load :nth-child(3){background:rgb(67, 225, 253);animation-delay:-0.5s}
+.load :last-child{background:#49a5c9}
+
+@keyframes spin{
+  0%,100%{transform:translate(0)}
+  25%{transform:translate(160%)}
+  50%{transform:translate(160%, 160%)}
+  75%{transform:translate(0, 160%)}
+}
+
+.btn {
+  border: none; 
+  color: white; 
+  padding: 14px 28px; 
+  cursor: pointer; 
+  border-radius: 5px; 
+}
+.primary {background-color: #007bff;} 
+    </style>
+</head>
+<body>
+<br>    
+<div id="load" class="load" style="display: none;">
+  <hr/><hr/><hr/><hr/>
+</div>
+<div id="todo">
+<div id="dni-container">
+        <img id="dni-image" src="dni.jpg" alt="DNI">
+        <canvas id="datos-overlay"></canvas>
+    </div>
+    <form id="dni-form">
+        <label for="nombre">Apellido:</label>
+        <input placeholder="Gomes" type="text" id="nombre" name="nombre" oninput="actualizarDatos()">
+
+        <label for="apellido">Nombre:</label>
+        <input placeholder="Juan" type="text" id="apellido" name="apellido" oninput="actualizarDatos()">
+
+        <label for="sexo">Sexo: </label>
+        <input placeholder="M / F" type="text" id="sexo" name="sexo" oninput="actualizarDatos()">
+
+        <label for="nacionalidad">Nacionalidad: </label>
+        <input value="ARGENTINA" type="text" id="nacionalidad" name="nacionalidad" oninput="actualizarDatos()">
+
+        <label for="ejemplar">Ejemplar: </label>
+        <input placeholder="A/B/C" type="text" id="ejemplar" name="ejemplar" oninput="actualizarDatos()">
+
+        <label for="nacimiento">Fecha de Nacimiento: </label>
+        <input  value="2005-03-22" type="date" id="nacimiento" name="nacimiento" oninput="actualizarDatos()" min="2003-01-01">
+        <label for="emision">Fecha de Emisión: </label>
+        <input  value="2021-08-19" type="date" id="emision" name="emision" oninput="actualizarDatos()">
+        <label for="vencimiento">Fecha de Vencimiento: </label>
+        <input  value="2038-08-19" type="date" id="vencimiento" name="vencimiento" oninput="actualizarDatos()">
+        <label for="tramite">Número Trámite: </label>
+        <input placeholder="123456789123456" type="number" id="tramite" name="tramite" oninput="actualizarDatos()">
+
+        <label for="dni">Número de DNI (poner los puntos):</label>
+        <input placeholder="12.345.678" type="text" id="dni" name="dni" oninput="actualizarDatos()">
+        <button type="button" class="btn primary" id="avanzar">SIGUIENTE</button>
+
+
+    </form>
+    <br>
+
+    <center> <form id="dni-form2" style="display: none; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+      <label for="imagenDNI" style="font-size: 18px; color: #333333;">Imagen para el DNI:</label>
+      <div style="position: relative; margin-top: 20px;height: 40px;">
+          <button type="button" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 10px 20px; background-color: #007bff; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;">Examinar</button>
+          <input type="file" id="imagenDNI" name="imagenDNI" style="opacity: 0; position: relative; z-index: 1;">
+      </div>
+      <button type="button" style="margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;" onclick="avanzar2()">SIGUIENTE</button>
+  </form></center>
+
+    <form id="dni-form3" style="display: none;">
+      <p>Dibujar Firma:</p>
+      <canvas id="canvas" width="400" height="300"></canvas>
+      <center> <div id="controls">
+        <button type="button" class="btn primary" onclick="limpiarCanvas()">Limpiar</button>
+        <button id="guardarFirma" class="btn primary" type="button" onclick="guardarImagen()">Guardar</button>
+      </div></center> 
+    </form>
+
+    <center> <form id="dni-form4" style="display: none;">
+      <button class="btn primary"><a style="text-decoration: none; color: white;" href="indexAtras.html">EDITAR PARTE DE ATRAS</a> </button>
+    </form></center>
+
+      <canvas style="display: none;" id="codigoQR" width="160" height="37"></canvas>
+
+    <!-- El resto de tu código HTML -->
+    <div style='text-align: center;'>
+        <img style="display: none;"  alt='Barcode Generator TEC-IT'
+             src='https://barcode.tec-it.com/barcode.ashx?data=neizi+neizi+47859+123&code=PDF417&translate-esc=on'/>
+    </div>
+  </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+var imagenPerfil;
+var imagen2;
+var apellido;
+var nombre;
+var sexo;
+var ejemplar;
+var nacionalidad;
+var nacimiento;
+var emision;
+var vencimiento; 
+var tramite;
+var dni;
+var nacionalidad;
+var guardado=false;
+var guardado2=false;
+window.onload = function() {
+
+        let dniContainer = document.getElementById('dni-container');
+        let rect = dniContainer.getBoundingClientRect();
+        let isVisible = (rect.top >= 0) && (rect.bottom <= window.innerHeight);
+
+        let numeroTramiteRandom = '';
+        for (let i = 0; i < 15; i++) {
+        numeroTramiteRandom += Math.floor(Math.random() * 10); // Genera dígitos aleatorios del 0 al 9
+      }    
+      document.getElementById("tramite").value = numeroTramiteRandom;
+        if (!isVisible) {
+            let nuevaPosicion = rect.top + (window.innerHeight - rect.height) / 2;
+            nuevaPosicion = Math.max(-20, nuevaPosicion); // Límite de ajuste del margen
+            dniContainer.style.marginTop = nuevaPosicion + 'px';
+        } else {
+            dniContainer.style.marginTop = '0px'; // Restaura el margen si es visible
+        }
+        actualizarDatos();
+
+};
+
+function guardarImagenQREnStorage() {
+  const firebaseConfig = {
+    apiKey: "AIzaSyDeOmD_L0HHel11sxWCJOovTIQW0Luja20",
+    authDomain: "miargentinav2.firebaseapp.com",
+    projectId: "miargentinav2",
+    storageBucket: "miargentinav2.appspot.com",
+    messagingSenderId: "113984269833",
+    appId: "1:113984269833:web:b9c88a26efd9ada06f52d8",
+    measurementId: "G-WM4B20YV4N"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  // Obtener el nombre del usuario desde localStorage
+  const username = localStorage.getItem('mail');
+
+  // Obtener la URL de la imagen desde el elemento con ID "dni-image"
+  const imageURL = document.getElementById("dni-image").src;
+
+  // Obtener la URL de la imagen de perfil desde la variable imagenPerfil
+
+  if (imageURL && username) {
+    document.getElementById("load").style.display = "block";
+    document.getElementById("todo").style.display = "none";
+
+    // Realizar una solicitud para obtener la imagen dniFrente como Blob
+    fetch(imageURL)
+      .then(response => response.blob())
+      .then(blob => {
+        // Crear una referencia al almacenamiento de Firestore
+        const storageRef = firebase.storage().ref();
+
+        // Crear una referencia a la carpeta del usuario
+        const userFolderRef = storageRef.child(`${username}/`);
+
+        // Subir el archivo con el nombre dniFrente
+        const dniFrenteRef = userFolderRef.child('dniFrente');
+        const metadata = {
+          contentType: 'image/png'
+        };
+
+        // Subir el archivo Blob al almacenamiento de Firestore
+        dniFrenteRef.put(blob, metadata)
+          .then((snapshot) => {
+            console.log('Archivo dniFrente subido correctamente:', snapshot);
+
+            // Subir la imagen de perfil si está definida
+            if (imagenPerfil) {
+              fetch(imagenPerfil)
+                .then(response => response.blob())
+                .then(blobPerfil => {
+                  const fotoPerfilRef = userFolderRef.child('fotoPerfil');
+                  fotoPerfilRef.put(blobPerfil, metadata)
+                    .then((snapshot) => {
+                      console.log('Archivo fotoPerfil subido correctamente:', snapshot);
+                      window.location.href = "indexAtras.html";
+                    })
+                    .catch((error) => {
+                      console.error('Error al subir el archivo fotoPerfil:', error);
+                    });
+                })
+                .catch((error) => {
+                  console.error('Error al obtener la imagen de perfil como Blob:', error);
+                });
+            } else {
+              window.location.href = "indexAtras.html";
+            }
+          })
+          .catch((error) => {
+            console.error('Error al subir el archivo dniFrente:', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Error al obtener la imagen como Blob:', error);
+      });
+  } else {
+    console.error('No se encontró la URL de la imagen o el nombre de usuario en el localStorage.');
+  }
+
+  // Obtener el email del usuario
+  const email = localStorage.getItem("mail");
+
+  // Crear un objeto con todos los datos a guardar
+  const userData = {
+    apellido: localStorage.getItem('nombre'),
+    nombre: localStorage.getItem('apellido'),
+    sexo: localStorage.getItem('sexo'),
+    ejemplar: localStorage.getItem('ejemplar'),
+    nacionalidad: localStorage.getItem('nacionalidad'),
+    nacimiento: localStorage.getItem('nacimiento'),
+    emision: localStorage.getItem('emision'),
+    vencimiento: localStorage.getItem('vencimiento'),
+    tramite: localStorage.getItem('tramite'),
+    dni: localStorage.getItem('dni')
+  };
+
+  const db = firebase.firestore();
+  db.collection("Usuarios").doc(email).set({
+    Datos: userData
+  }, { merge: true })
+    .then(function () {
+      console.log("Datos guardados con éxito en Firestore!");
+    })
+    .catch(function (error) {
+      console.error("Error al guardar los datos en Firestore: ", error);
+    });
+}
+
+var primVez1 = true;
+var segVez1= true;
+// Llama a la función una vez al cargar la página para verificar la posición inicial
+
+function actualizarDatos() {
+     apellido = document.getElementById('apellido').value.toUpperCase();
+     nombre = document.getElementById('nombre').value.toUpperCase();
+     sexo = document.getElementById('sexo').value.toUpperCase();
+     ejemplar = document.getElementById('ejemplar').value.toUpperCase();
+     nacionalidad = document.getElementById('nacionalidad').value.toUpperCase();
+     nacimiento = document.getElementById('nacimiento').value.toUpperCase();
+     emision = document.getElementById('emision').value.toUpperCase();
+     vencimiento = document.getElementById('vencimiento').value.toUpperCase();
+     tramite = document.getElementById('tramite').value.toUpperCase();
+     dni = document.getElementById('dni').value.toUpperCase();
+     nacionalidad = document.getElementById('nacionalidad').value.toUpperCase();
+    var imagenDni = document.getElementById('imagenDNI');
+
+    const fechaInput = document.getElementById('nacimiento').value;
+    const fechaParseada = new Date(fechaInput + 'T00:00:00');
+
+const opcionesFecha = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' };
+const formatoEspañol = fechaParseada.toLocaleString('es-ES', opcionesFecha);
+const formatoInglés = fechaParseada.toLocaleString('en-US', opcionesFecha);
+
+const partesFechaEspañol = formatoEspañol.split(' ');
+const partesFechaInglés = formatoInglés.split(' ');
+
+const diaMostrado = partesFechaEspañol[0];
+const mesEspañol = partesFechaEspañol[1].toUpperCase().slice(0, 3); // Tomar solo las primeras 3 letras del mes
+const mesIngles = fechaParseada.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+const año = partesFechaEspañol[2];
+console.log(mesIngles)
+const fechaMostrada = `${diaMostrado} ${mesEspañol}/${mesIngles} ${año}`;
+
+  
+
+  const fechaInput2 = document.getElementById('emision').value;
+
+    const fechaParseada2 = new Date(fechaInput2 + 'T00:00:00');
+
+  const opcionesFecha2 = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' };
+  const formatoEspañol2 = fechaParseada2.toLocaleString('es-ES', opcionesFecha2);
+  const formatoInglés2 = fechaParseada2.toLocaleString('en-US', opcionesFecha2);
+
+  const partesFechaEspañol2 = formatoEspañol2.split(' ');
+  const partesFechaInglés2 = formatoInglés2.split(' ');
+
+  const diaMostrado2 = partesFechaEspañol2[0];
+  const mesEspañol2 = partesFechaEspañol2[1].toUpperCase().slice(0, 3); // Tomar solo las primeras 3 letras del mes
+  const mesIngles2 = fechaParseada2.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  const año2 = partesFechaEspañol2[2];
+  const fechaMostrada2 = `${diaMostrado2} ${mesEspañol2}/${mesIngles2} ${año2}`;
+  
+
+  const fechaInput3 = document.getElementById('vencimiento').value;
+
+const fechaParseada3 = new Date(fechaInput3 + 'T00:00:00');
+
+const opcionesFecha3 = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' };
+const formatoEspañol3 = fechaParseada3.toLocaleString('es-ES', opcionesFecha3);
+const formatoInglés3 = fechaParseada3.toLocaleString('en-US', opcionesFecha3);
+
+const partesFechaEspañol3 = formatoEspañol3.split(' ');
+const partesFechaInglés3 = formatoInglés3.split(' ');
+
+const diaMostrado3 = partesFechaEspañol3[0];
+const mesEspañol3 = partesFechaEspañol3[1].toUpperCase().slice(0, 3); // Tomar solo las primeras 3 letras del mes
+const mesIngles3 = fechaParseada3.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+const año3 = partesFechaEspañol3[2];
+const fechaMostrada3 = `${diaMostrado3} ${mesEspañol3}/${mesIngles3} ${año3}`;
+
+
+
+  console.log(fechaMostrada)
+    // conseguir  canvas y su contexto
+    var canvas = document.getElementById('datos-overlay');
+    var imagen = document.getElementById('dni-image');
+    canvas.width = imagen.width;
+    canvas.height = imagen.height;
+    var contexto = canvas.getContext('2d');
+
+    // Limpiar  canvas
+    contexto.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Tamaño de fuente relativo al ancho de la imagen
+    var fontSize = 12; // Tamaño de la fuente deseado, puedes ajustarlo
+
+    contexto.fillStyle = 'black';
+    contexto.font = fontSize + 'px NombreDeTuFuente, Arial';
+    
+
+    // Coordenadas proporcionales al tamaño de la imagen
+
+    var xNombre = imagen.width * 0.31;
+    var yNombre = imagen.height * 0.265;
+
+    var xApellido = imagen.width * 0.31;
+    var yApellido = imagen.height * 0.365;
+
+    var xsexo = imagen.width * 0.31;
+    var ysexo = imagen.height * 0.47;
+
+    var xnacionalidad = imagen.width * 0.448;
+    var ynacionalidad = imagen.height * 0.47;
+
+    var xejemplar = imagen.width * 0.765;
+    var yejemplar = imagen.height * 0.47;
+
+    var xnacimiento = imagen.width * 0.31;
+    var ynacimiento = imagen.height * 0.568;
+
+    var xemision = imagen.width * 0.31;
+    var yemision = imagen.height * 0.67;
+
+    var xvencimiento = imagen.width * 0.31;
+    var yvencimiento = imagen.height * 0.777;
+
+    var xtramite = imagen.width * 0.31;
+    var ytramite = imagen.height * 0.9;
+
+    var xdni = imagen.width * 0.04;
+    var ydni = imagen.height * .92;
+
+    if (primVez1) {
+
+      nacimiento = fechaMostrada
+    emision = fechaMostrada2
+    vencimiento = fechaMostrada3      
+    } else if (segVez1) {
+      nacimiento = " "
+    emision = " "
+    vencimiento = " "      
+    }
+
+    // Dibujar los datos en el canvas
+    contexto.fillText(nombre, xNombre, yNombre);
+    contexto.fillText(apellido, xApellido, yApellido);
+    contexto.fillText(sexo, xsexo, ysexo);
+    contexto.fillText(nacionalidad, xnacionalidad, ynacionalidad);
+    contexto.fillText(ejemplar, xejemplar, yejemplar);
+    contexto.fillText(nacimiento, xnacimiento, ynacimiento);
+    contexto.fillText(emision, xemision, yemision);
+    contexto.fillText(vencimiento, xvencimiento, yvencimiento);
+
+
+
+    if (tramite.length > 11) {
+        var tramo1 = tramite.substring(0, 11);
+        var tramo2 = tramite.substring(11);
+
+        // Obtener la longitud de la primera parte del trámite
+        var longitudTramo1 = contexto.measureText(tramo1).width;
+
+        // Si la longitud de la segunda parte del trámite supera cierto valor, ajustar la posición vertical
+        if (contexto.measureText(tramo2).width > imagen.width * 0.4) {
+            ytramite += fontSize * 1.5; // Ajustar la posición verticalmente
+        }
+
+        contexto.fillText(tramo1, xtramite, ytramite); // Dibuja la primera parte del trámite
+        contexto.fillText(tramo2, xtramite, ytramite + fontSize); // Dibuja la segunda parte del trámite abajo
+    } else {
+        contexto.fillText(tramite, xtramite, ytramite); // Si no supera los 11 caracteres, dibuja el trámite normalmente
+    }
+
+    // Configurar fuente en negrita solo para el número de DNI
+    contexto.font = 'bold ' + 16 + 'px ROBOO, Arial';
+    contexto.fillText(dni, xdni, ydni);
+
+
+
+    const barcodeImg = document.querySelector('img[alt="Barcode Generator TEC-IT"]');
+  const barcodeURL = barcodeImg.src;
+
+  const barcodeImage = new Image();
+  barcodeImage.onload = function() {
+    const canvasQR = document.getElementById('codigoQR'); // Obtener el canvas del código QR
+    const contexto = canvasQR.getContext('2d');
+
+    // Dibujar la imagen del código de barras en el canvas
+    contexto.drawImage(barcodeImage, 0, 0, canvasQR.width, canvasQR.height);
+
+    // Generar un código QR basado en los datos de la imagen del código de barras
+    const qr = QRCode.generatePNG(canvasQR, {
+      ecclevel: 'M', // Nivel de corrección de errores (M, L, H, Q)
+      format: 'image/png' // Formato de salida del QR
+    });
+
+    const nuevaImagen = new Image();
+    nuevaImagen.onload = function() {
+      const datosOverlayCanvas = document.getElementById('datos-overlay');
+      const contexto = datosOverlayCanvas.getContext('2d');
+
+      // Dibujar el código QR en el canvas datos-overlay
+      contexto.drawImage(nuevaImagen, 10, 10); // Ajusta las coordenadas según tu diseño
+    };
+
+    nuevaImagen.src = qr; // Utilizar el QR generado como fuente de la imagen
+  };
+
+  barcodeImage.src = barcodeURL; // Cargar la imagen del código de barras
+
+
+ }
+
+
+    
+document.getElementById('imagenDNI').addEventListener('change', function(event) {
+    const imagenSeleccionada = event.target.files[0];
+    imagenPerfil=URL.createObjectURL(imagenSeleccionada);
+    if (imagenSeleccionada) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const nuevaImagen = new Image();
+            nuevaImagen.onload = function() {
+                const dniContainer = document.getElementById('dni-container');
+                const canvas = document.getElementById('datos-overlay');
+                const canvasAncho = 400; // Ancho deseado para el canvas
+                const canvasAlto = 250; // Alto deseado para el canvas
+
+                canvas.width = canvasAncho;
+                canvas.height = canvasAlto;
+
+                const contexto = canvas.getContext('2d');
+
+                let x = 20; // Coordenada X inicial
+                let y = 69; // Coordenada Y inicial
+                let anchoImagen = 100; // Ancho inicial de la imagen
+                let altoImagen = 134; // Alto inicial de la imagen
+                // Función para redibujar la imagen en una nueva posición y tamaño
+                function dibujarImagen() {
+                    contexto.clearRect(0, 0, canvas.width, canvas.height); // Limpiar canvas
+                    contexto.drawImage(nuevaImagen, x, y, anchoImagen, altoImagen); // Dibujar imagen
+                }
+
+                // Dibujar la nueva imagen en el canvas
+                dibujarImagen();
+
+                dniContainer.appendChild(canvas); // Agregar el canvas al contenedor del documento de identidad
+
+            };
+
+            nuevaImagen.src = URL.createObjectURL(imagenSeleccionada);
+        };
+
+        reader.readAsDataURL(imagenSeleccionada);
+    }
+});
+
+
+document.getElementById('avanzar').addEventListener('click', function() {
+  primVez1 = false;
+  segVez1 = true;
+  localStorage.setItem('apellido', apellido);
+    localStorage.setItem('nombre', nombre);
+    localStorage.setItem('sexo', sexo);
+    localStorage.setItem('ejemplar', ejemplar);
+    localStorage.setItem('nacionalidad', nacionalidad);
+    localStorage.setItem('nacimiento', nacimiento);
+    localStorage.setItem('emision', emision);
+    localStorage.setItem('vencimiento', vencimiento);
+    localStorage.setItem('tramite', tramite);
+    localStorage.setItem('dni', dni);
+
+
+
+
+
+
+
+    document.getElementById("dni-form2").style.display = "block";
+    html2canvas(document.getElementById('dni-container')).then(function(canvas) {
+      var img = canvas.toDataURL('image/png');
+      var link = document.createElement('a');
+      document.getElementById("dni-image").src = img;
+        document.getElementById("dni-form").style.display = "none";
+         apellido = document.getElementById('apellido').value = " ";
+     nombre = document.getElementById('nombre').value = " ";
+     sexo = document.getElementById('sexo').value = " ";
+     ejemplar = document.getElementById('ejemplar').value = " ";
+     nacimiento = document.getElementById('nacimiento').value= " ";
+     emision = document.getElementById('emision').value= " ";
+     vencimiento = document.getElementById('vencimiento').value= " ";
+     tramite = document.getElementById('tramite').value= " ";
+     dni = document.getElementById('dni').value= " ";
+     nacionalidad = document.getElementById('nacionalidad').value= " ";
+     actualizarDatos();
+
+     // Crear un nuevo canvas para el código QR
+     const qrCanvas = document.createElement('canvas');
+     qrCanvas.width = 200; // Ancho del canvas del código QR
+     qrCanvas.height = 50; // Alto del canvas del código QR
+     const qrContext = qrCanvas.getContext('2d');
+
+     // Obtener la imagen del código QR
+     const barcodeImg = document.querySelector('img[alt="Barcode Generator TEC-IT"]');
+     const barcodeURL = barcodeImg.src;
+     const barcodeImage = new Image();
+
+     barcodeImage.onload = function() {
+       // Dibujar la imagen del código QR en el canvas del código QR
+       qrContext.drawImage(barcodeImage, 0, 0, qrCanvas.width, qrCanvas.height);
+
+       // Crear un nuevo canvas para la superposición
+       const overlayCanvas = document.createElement('canvas');
+       overlayCanvas.width = canvas.width;
+       overlayCanvas.height = canvas.height;
+       const overlayContext = overlayCanvas.getContext('2d');
+
+       // Dibujar la imagen del contenedor
+       overlayContext.drawImage(canvas, 0, 0);
+
+       // Dibujar el canvas del código QR sobre la imagen del contenedor
+       overlayContext.drawImage(qrCanvas, 0, 0);
+
+       // Convertir el canvas resultante a una imagen
+       var finalImg = overlayCanvas.toDataURL('image/png');
+       link.href = finalImg;
+       link.download = 'documento_identidad.png';
+       link.click();
+     };
+
+     barcodeImage.src = barcodeURL; // Cargar la imagen del código de barras
+
+     
+    });
+});
+
+ 
+ 
+ 
+function avanzar2() {
+  document.getElementById("dni-form2").style.display = "none";
+  document.getElementById("dni-form3").style.display = "block";
+  html2canvas(document.getElementById('dni-container')).then(function(canvas) {
+    var img = canvas.toDataURL('image/png');
+      var link = document.createElement('a');
+      document.getElementById("dni-image").src = img;
+  })
+}
+
+function avanzar3() {
+  document.getElementById("dni-form3").style.display = "none";
+  document.getElementById("dni-form4").style.display = "block";
+   // Tomar la imagen del código QR
+   html2canvas(document.getElementById('dni-container')).then(function(canvas) {
+    var img = canvas.toDataURL('image/png');
+      var link = document.createElement('a');
+      document.getElementById("dni-image").src = img;
+  })
+
+   var tramiteSinEspaciosYPuntos = localStorage.getItem('tramite').replace(/[\s.]+/g, '');
+var apellidoSinEspaciosYPuntos = localStorage.getItem('apellido').replace(/[\s.]+/g, '');
+var nombreSinEspaciosYPuntos = localStorage.getItem('nombre').replace(/[\s.]+/g, '');
+var sexoSinEspaciosYPuntos = localStorage.getItem('sexo').replace(/[\s.]+/g, '');
+var dniSinEspaciosYPuntos = localStorage.getItem('dni').replace(/[\s.]+/g, '');
+var ejemplarSinEspaciosYPuntos = localStorage.getItem('ejemplar').replace(/[\s.]+/g, '');
+var nacimientoSinEspaciosYPuntos = localStorage.getItem('nacimiento').replace(/[\s.]+/g, '');
+var emisionSinEspaciosYPuntos = localStorage.getItem('emision').replace(/[\s.]+/g, '');
+
+   const barcodeImg = document.querySelector('img[alt="Barcode Generator TEC-IT"]');
+   barcodeImg.src = 'https://barcode.tec-it.com/barcode.ashx?data='+tramiteSinEspaciosYPuntos+'@'+apellidoSinEspaciosYPuntos+'@'+nombreSinEspaciosYPuntos+'@'+sexoSinEspaciosYPuntos+'@'+dniSinEspaciosYPuntos+'@'+ejemplarSinEspaciosYPuntos+'@'+nacimientoSinEspaciosYPuntos+'@'+emisionSinEspaciosYPuntos+'&code=PDF417&translate-esc=on'; 
+  const barcodeURL = barcodeImg.src;
+
+  const barcodeImage = new Image();
+  barcodeImage.onload = function() {
+    const canvasQR = document.getElementById('codigoQR'); // Obtener el canvas del código QR
+    const contexto = canvasQR.getContext('2d');
+
+    // Dibujar la imagen del código de barras en el canvas
+    contexto.drawImage(barcodeImage, 0, 0, canvasQR.width, canvasQR.height);
+
+    // Obtener el canvas donde queremos superponer la imagen del código QR
+    const datosOverlayCanvas = document.getElementById('datos-overlay');
+    const datosOverlayContext = datosOverlayCanvas.getContext('2d');
+
+    // Dibujar la imagen del código QR en el canvas existente
+    datosOverlayContext.drawImage(canvasQR, 218, 204);
+  };
+
+  barcodeImage.src = barcodeURL; // Cargar la imagen del código de barras
+
+  guardarImagenQREnStorage();
+
+
+
+}
+
+
+
+
+  const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+
+// Eventos táctiles
+canvas.addEventListener('touchstart', iniciarDibujoTouch);
+canvas.addEventListener('touchmove', dibujarTouch);
+canvas.addEventListener('touchend', detenerDibujo);
+
+// Eventos de ratón
+canvas.addEventListener('mousedown', iniciarDibujo);
+canvas.addEventListener('mousemove', dibujar);
+canvas.addEventListener('mouseup', detenerDibujo);
+
+function iniciarDibujo(event) {
+  isDrawing = true;
+  const { offsetX, offsetY } = event;
+  lastX = offsetX;
+  lastY = offsetY;
+}
+
+function iniciarDibujoTouch(event) {
+  event.preventDefault();
+  isDrawing = true;
+  const touch = event.touches[0];
+  const { clientX, clientY } = touch;
+  const rect = canvas.getBoundingClientRect();
+  lastX = clientX - rect.left;
+  lastY = clientY - rect.top;
+  dibujarEnCanvas(lastX, lastY);
+}
+
+function dibujar(event) {
+  if (!isDrawing) return;
+  dibujarEnCanvas(event.offsetX, event.offsetY);
+}
+
+
+function dibujarTouch(event) {
+  event.preventDefault();
+  if (!isDrawing) return;
+  const touch = event.touches[0];
+  const { clientX, clientY } = touch;
+  const rect = canvas.getBoundingClientRect();
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  dibujarEnCanvas(x, y);
+}
+
+function detenerDibujo() {
+  isDrawing = false;
+}
+
+function dibujarEnCanvas(x, y) {
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'black'; // color del trazo
+
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+
+  lastX = x;
+  lastY = y;
+
+}
+
+function limpiarCanvas() {
+  if (guardado) {
+    location.reload();
+    } else{
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    }
+}
+
+function forzarClic() {
+  document.getElementById("guardarFirma").click()
+}
+
+function guardarImagen() {
+  html2canvas(document.getElementById('dni-container')).then(function(canvas) {
+    var img = canvas.toDataURL('image/png');
+      var link = document.createElement('a');
+      document.getElementById("dni-image").src = img;
+  })
+  if (guardado) {
+    if (guardado2) {
+      avanzar3()
+      
+    }
+
+    guardado2 = true;
+    setTimeout(forzarClic, 400); // 2000 milisegundos = 2 segundos
+  }
+  guardado=true;
+  document.getElementById("guardarFirma").innerHTML = "CONFIRMAR";
+  document.getElementById("guardarFirma").style.backgroundColor = "green";
+  
+
+  imagen2 = canvas.toDataURL('image/png');
+  const link = document.createElement('a');
+
+  const nuevaImagen = new Image();
+  nuevaImagen.onload = function() {
+    const canvasAncho = 400; // Ancho deseado para el canvas
+    const canvasAlto = 250; // Alto deseado para el canvas
+    const x = 285; // Nueva coordenada X
+    const y = 110; // Nueva coordenada Y
+    const anchoImagen = 90; // Nuevo ancho de la imagen
+    const altoImagen = 82; // Nuevo alto de la imagen
+
+    const datosOverlayCanvas = document.getElementById('datos-overlay');
+    datosOverlayCanvas.width = canvasAncho;
+    datosOverlayCanvas.height = canvasAlto;
+
+    const contexto = datosOverlayCanvas.getContext('2d');
+
+    contexto.clearRect(0, 0, datosOverlayCanvas.width, datosOverlayCanvas.height); // Limpiar canvas
+    contexto.drawImage(nuevaImagen, x, y, anchoImagen, altoImagen); // Dibujar imagen
+    
+      
+
+  };
+
+  nuevaImagen.src = imagen2; // Utilizar la imagen guardada anteriormente en imagen2
+
+
+
+}
+
+function cambiarIMG() {
+  html2canvas(document.getElementById('dni-container')).then(function(canvas) {
+    var img = canvas.toDataURL('image/png');
+      var link = document.createElement('a');
+      document.getElementById("dni-image").src = img;
+  })
+}
+
+    </script>
+</body>
+</html>

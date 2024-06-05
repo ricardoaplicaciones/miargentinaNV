@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Argentina</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+
+</head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: white;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.logo img {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    
+}
+
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    width: 86%;
+    padding-right: 40px;
+}
+
+.show-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+button {
+    background-color: #337ab7;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #337ab7;
+}
+
+.forgot-password {
+    color: #337ab7;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.create-account {
+    margin-top: 20px;
+}
+
+.create-button {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 10px;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 370px;
+}
+
+.create-button:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+
+</style>
+<body>
+    <div id="load" style="display: none;">
+        Cargando..
+    </div>
+    <div class="container" id="todo" style="display: block;">
+        <div class="logo">
+            <img src="img/logo.PNG" style="width: 300px; padding-bottom: 100px;" alt="miArgentina">
+        </div>
+        <form class="login-form">
+            <input id="mail" type="text" placeholder="Ingrese su Mail" required>
+            <a id="mailError" style="color: red; font-size: x-small;display: none;">El mail ya esta en uso</a>
+            <div class="password-container">
+                <input id="contra" type="password" placeholder="Ingrese una Contraseña" required>
+                <span class="show-password">&#128065;</span>
+                <a id="contraError" style="color: red; font-size: x-small;display: none;">La contraseña no puede estar en blanco</a>
+            </div>
+            <button onclick="datosEnviadosRegistrar()" type="button">Registrarse</button>
+        </form>
+        <hr style="border-color:rgba(255, 255, 255, 0.5)">
+        <div class="create-account">
+            <p>¿Ya tenes cuenta?</p>
+            <button onclick="iniciarSesion()" class="create-button">Iniciar Sesion</button>
+            <br>
+            <br>
+            <p>dni exclusivamente para boliches, si se usa para cualquier otra cosa sera desactivado.</p>
+            <p>Cantidad de dnis creados: 1230</p>
+            <button style="width: 370px;">SOPORTE</button>
+        </div>
+    </div>
+    <script>
+                function iniciarSesion() {
+            window.location.href = "iniciarSesion.html"
+        }
+        
+        fetch('credenciales.json')
+            .then(response => response.json())
+            .then(config => {
+                const firebaseConfig = config;
+                const app = firebase.initializeApp(firebaseConfig);   
+            })
+            .catch(error => {
+                console.error('Error al cargar la configuración de Firebase:', error);
+            }); 
+  function datosEnviadosRegistrar() {
+            const mail = document.getElementById('mail').value;
+            const contrasenia = document.getElementById('contra').value;
+            document.getElementById("todo").style.display= "none";
+            document.getElementById("load").style.display= "block";
+            var fechaHoraActual = new Date();
+        var horaActual = fechaHoraActual.toLocaleTimeString();
+        var fechaActual = fechaHoraActual.toLocaleDateString();
+            const db = firebase.firestore();
+            
+            if (contrasenia == "") {
+                 document.getElementById("contraError").style.display = "block";
+                 document.getElementById("todo").style.display= "block";
+              document.getElementById("load").style.display= "none";
+
+            }else{
+                const docData = {
+                    mail: mail,
+                    contrasenia:contrasenia,
+                    activado:false,
+                    creacion:fechaActual
+            }
+
+            const usuariosRef = db.collection('Usuarios');
+            usuariosRef.where('mail', '==', mail)
+            .get()
+            .then((querySnapshot) => {
+            if (querySnapshot.size > 0) {
+              document.getElementById("mailError").style.display = "block";
+              document.getElementById("contraError").style.display = "none";
+              document.getElementById("todo").style.display= "block";
+            document.getElementById("load").style.display= "none";
+
+                  console.log("El correo ya existe en la base de datos");
+         } else {
+            usuariosRef.where('mail', '==', mail)
+              .get()
+              .then((querySnapshot) => {
+                if (querySnapshot.size > 0) {
+                    document.getElementById("mailError").style.display = "block";
+
+                  document.getElementById("contraError").style.display = "none";
+
+                } else {
+                  db.collection("Usuarios").doc(mail).set(docData)
+                    .then(() => {
+                      console.log("Documento escrito exitosamente");
+                      localStorage.setItem("mail",mail);
+                      window.location.href = "editarDni.html"
+                    })
+                    .catch((error) => {
+                      console.error('Error al escribir el documento:', error);
+                    });
+                }
+              })
+              .catch((error) => {
+                console.error('Error al consultar la base de datos:', error);
+              });
+          }
+        })
+        .catch((error) => {
+          console.error('Error al consultar la base de datos:', error);
+        });
+
+
+
+
+
+        }
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #F0F0F0;
+        }
+        .header {
+            background-color: #337ab7;
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+            border-bottom-left-radius: 13px;
+            border-bottom-right-radius: 13px;
+            height: 100px; /* Adjust the height as needed */
+        }
+        .back-arrow {
+            font-size: 24px;
+            margin-right: 10px;
+            align-self: flex-start;
+        }
+        .text {
+            flex-grow: 1;
+            padding-right: 80px; /* To avoid overlap with the image */
+        }
+        .title {
+            font-size: 18px;
+            margin: 0;
+            padding-top: 4px;
+        }
+        .subtitle {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+        .phone-image {
+            position: absolute;
+            right: 20px;
+            width: 85px;
+            height: auto; /* Maintain aspect ratio */
+        }
+        .dni-card {
+    width: 300px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: left;
+    background-color: white;
+}
+
+.dni-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dni-header img {
+    width: 60px;
+    height: 40px;
+}
+
+.dni-title h2 {
+    margin: 0;
+    margin-left: 10px;
+    font-size: 16px;
+}
+
+.dni-button, .solicitar-button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 25px;
+    background-color: #337ab7;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+.dni-button{
+    border: none;
+}
+.solicitar-button{
+    background-color: white;
+    color: rgb(40, 40, 184);
+    font-weight: bold;
+    border-color: #337ab7;
+    font-size: 16px;
+}
+.info {
+    font-size: 12px;
+    color: black;
+}
+
+.renaper {
+    font-size: 14px;
+    color: #2EB6E6;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+.reminder {
+    font-size: 16px;
+    color: #333;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.change-device {
+    font-size: 12px;
+    color: #2EB6E6;
+    text-decoration: none;
+    display: block;
+    margin-top: 10px;
+}
+.footer {
+            background-color: white;
+            padding: 10px 0px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #ccc;
+        }
+        .footer img {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span onclick="atras()" class="back-arrow">&larr;</span>
+        <div class="text">
+            <p class="title">Mis documentos</p>
+            <br>
+            <p class="subtitle">Tus documentos importantes, en un solo lugar.</p>
+        </div>
+        <img src="img/celular.PNG" alt="Phone" class="phone-image">
+    </div>
+    <center style="padding-top: 10px;"><div class="dni-card">
+        <div class="dni-header">
+            <img src="img/dniImg.png" alt="DNI Icon">
+            <div class="dni-title">
+                <h2>Documento Nacional de Identidad (DNI)</h2>
+            </div>
+        </div>
+        <hr style="border-color:rgb(255, 255, 255)">
+        <button onclick="dni()" class="dni-button">Ver DNI Digital</button>
+        <p class="info">Información suministrada por</p>
+        <p class="renaper">RENAPER</p>
+        <hr style="border-color:rgb(255, 255, 255)">
+        <p class="reminder">Recordá que podés solicitar el DNI para vos y para tus hijos y tenerlo disponible en la App.</p>
+        <button class="solicitar-button">Solicitar DNI Digital</button>
+        <a href="#" class="change-device">Cambié o voy a cambiar de dispositivo</a>
+    </div></center>
+    <div class="footer">
+        <img src="img/inicio.PNG" alt="Inicio">
+        <img style="width: 60px; height: 43px;" src="img/novedades.PNG" alt="Novedades">
+        <img style="width: 50px;" src="img/telefonos.PNG" alt="Teléfonos">
+        <img src="img/tina.PNG" alt="Tina">
+    </div>
+    <script>
+        function dni() {
+            window.location.href = "dni.html"
+        }
+        function atras() {
+            window.location.href = "index.html"
+        }
+    </script>
+</body>
+</html>

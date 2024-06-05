@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Argentina</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+</head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: white;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.logo img {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    
+}
+
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    width: 86%;
+    padding-right: 40px;
+}
+
+.show-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+button {
+    background-color: #337ab7;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #337ab7;
+}
+
+.forgot-password {
+    color: #337ab7;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.create-account {
+    margin-top: 20px;
+}
+
+.create-button {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 10px;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 370px;
+}
+
+.create-button:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+</style>
+<body>
+    <div id="load" style="display: none;">
+        Cargando..
+    </div>
+    <div class="container" id="todo" style="display: block;">
+        <div class="logo">
+            <img src="img/logo.PNG" style="width: 300px; padding-bottom: 100px;" alt="miArgentina">
+        </div>
+        <form class="login-form">
+            <input id="mail2" type="text" placeholder="Ingrese su Mail" required>
+            <a id="mailError2" style="color: red; font-size: x-small;display: none;">El mail no existe</a>
+            <div class="password-container">
+                <input id="contra2" type="password" placeholder="Contraseña" required>
+                <a id="contraError2" style="color: red; font-size: x-small;display: none;">La contraseña es incorrecta</a>
+
+            </div>
+            <button onclick="datosEnviadosIniciarSesion()" type="button">Ingresar a mi cuenta</button>
+            <a href="#" class="forgot-password">Recuperar mi contraseña</a>
+        </form>
+        <hr style="border-color:rgba(255, 255, 255, 0.5)">
+        <div class="create-account">
+            <p>¿No tenés cuenta en Mi Argentina?</p>
+            <button onclick="crearCuenta()" class="create-button">Crear cuenta</button>
+        </div>
+    </div>
+<script>        
+function crearCuenta() {
+    window.location.href = "registrarse.html"
+}
+
+  fetch('credenciales.json')
+            .then(response => response.json())
+            .then(config => {
+                const firebaseConfig = config;
+                const app = firebase.initializeApp(firebaseConfig);   
+            })
+            .catch(error => {
+                console.error('Error al cargar la configuración de Firebase:', error);
+            });
+  function datosEnviadosIniciarSesion() {
+          const mail = document.getElementById('mail2').value;
+          const contrasenia = document.getElementById('contra2').value;
+          const db = firebase.firestore();
+          const usuariosRef = db.collection('Usuarios');
+          document.getElementById("todo").style.display= "none";
+          document.getElementById("load").style.display= "block";
+          
+            usuariosRef.where('mail', '==', mail)
+              .get()
+              .then((querySnapshot) => {
+                if (!(querySnapshot.size > 0)) {
+                  console.log("El usuario no existe");
+                  document.getElementById("mailError2").style.display = "block";
+                  document.getElementById("todo").style.display= "block";
+                  document.getElementById("load").style.display= "none";
+                } else {
+                  usuariosRef.where('contrasenia', '==', contrasenia)
+                    .get()
+                    .then((querySnapshot) => {
+                      if (!(querySnapshot.size > 0)) {
+                        console.log("Contraseña incorrecta");
+                        document.getElementById("contraError2").style.display = "block";
+                        document.getElementById("mailError2").style.display = "none";
+                        document.getElementById("todo").style.display= "block";
+                        document.getElementById("load").style.display= "none";
+                      } else {
+                        console.log("entro");
+                        document.getElementById("mailError2").style.display = "none";
+                        document.getElementById("contraError2").style.display = "none";
+                        localStorage.setItem("mail", mail);
+                        window.location.href = "index.html";
+                      }
+                    })
+                    .catch((error) => {
+                      console.error('Error al consultar la base de datos:', error);
+                    });
+                }
+              })
+              .catch((error) => {
+                console.error('Error al consultar la base de datos:', error);
+              });    
+
+
+        }
+
+</script>
+</body>
+</html>

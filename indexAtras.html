@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de DNI</title>
+    <link rel="stylesheet" href="https://use.typekit.net/hdq5bvf.css">    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+    
+
+    <style>
+@font-face {
+  font-family: 'NombreDeTuFuente'; 
+  src: url('NimbusSanL-Reg.otf') format('opentype');
+}
+@font-face {
+  font-family: 'NombreDeTuFuente2'; 
+  src: url('NimbusSanL-Reg.woff') format('opentype');
+}
+
+
+        body {
+            font-family: "NombreDeTuFuente", "NombreDeTuFuente2";
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: normal;
+            height: 100vh;
+        }
+
+        #dni-container {
+    position: relative;
+    width: 400px; /* Tamaño fijo para la imagen */
+    height: auto; /* Altura automática para mantener la proporción */
+    margin: 0 auto; /* Centrar el contenedor */
+}
+
+
+        #dni-image {
+            width: 100%;
+            display: block;
+        }
+
+        #datos-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #dni-form {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative; /* Asegura que el formulario este bien sobre la imagen */
+            z-index: 1; /* Asegura que el formulario esté arriba de la imagen */
+        }
+
+        #dni-form label, #dni-form input, #dni-form button {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        #canvas {
+      border: 4px solid black;
+    }
+    
+    #controls {
+      margin-top: 10px;
+    }
+
+
+.load{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);
+  /*change these sizes to fit into your project*/
+  width:100px;
+  height:100px;
+}
+.load hr{border:0;margin:0;width:40%;height:40%;position:absolute;border-radius:50%;animation:spin 2s ease infinite}
+
+.load :first-child{background:#6dcfbd;animation-delay:-1.5s}
+.load :nth-child(2){background:#3af6e6;animation-delay:-1s}
+.load :nth-child(3){background:rgb(67, 225, 253);animation-delay:-0.5s}
+.load :last-child{background:#49a5c9}
+
+@keyframes spin{
+  0%,100%{transform:translate(0)}
+  25%{transform:translate(160%)}
+  50%{transform:translate(160%, 160%)}
+  75%{transform:translate(0, 160%)}
+}
+    </style>
+</head>
+<body>
+    <div id="load" class="load" style="display: none;">
+        <hr/><hr/><hr/><hr/>
+      </div>
+      <div id="todo">
+    <div id="dni-container">
+        <img id="dni-image" src="dniAtras.jpg" alt="DNI">
+        <canvas id="datos-overlay"></canvas>
+    </div>
+    <form id="dni-form">
+        <label for="domicilio">Domicilio: </label>
+        <input value="Calle 1234 barrio provincia" type="text" id="domicilio" name="domicilio" oninput="actualizarDatos()">
+        <button type="button" onclick="avanzar()">AVANZAR</button>
+    </form>
+</div>
+    <script>
+var renglon1;
+var renglon2;
+var renglon3;
+window.onload = function() {
+
+        let dniContainer = document.getElementById('dni-container');
+        let rect = dniContainer.getBoundingClientRect();
+        let isVisible = (rect.top >= 0) && (rect.bottom <= window.innerHeight);
+
+        if (!isVisible) {
+            let nuevaPosicion = rect.top + (window.innerHeight - rect.height) / 2;
+            nuevaPosicion = Math.max(-20, nuevaPosicion); // Límite de ajuste del margen
+            dniContainer.style.marginTop = nuevaPosicion + 'px';
+        } else {
+            dniContainer.style.marginTop = '0px'; // Restaura el margen si es visible
+        }
+        var dniSinEspaciosYPuntos = localStorage.getItem('dni').replace(/[\s.]+/g, '');
+        var apellidoSinEspaciosYPuntos = localStorage.getItem('nombre').replace(/[\s.]+/g, '');
+    let nacimientoAño = localStorage.getItem('nacimiento').slice(-2);
+        renglon1 = "IDARG"+dniSinEspaciosYPuntos+"<1<<<<<<<<<<<<<<<";
+        renglon2 = nacimientoAño+Math.floor(10000 + Math.random() * 90000)+localStorage.getItem("sexo")+Math.floor(1000000 + Math.random() * 9000000)+"ARG<<<<<<<<<<<"+Math.floor(Math.random() * 10);
+        renglon3 = apellidoSinEspaciosYPuntos+"<<"+localStorage.getItem("apellido");
+        
+        actualizarDatos();
+
+};
+
+    function avanzar() {
+        html2canvas(document.getElementById('dni-container')).then(function(canvas) {
+      var img = canvas.toDataURL('image/png');
+      var link = document.createElement('a');
+      document.getElementById("dni-image").src = img;
+      guardarImagenEnStorage();
+    })
+    
+    //window.location.href="vistaDni.html";
+    }
+
+    function actualizarDatos() {
+        
+
+    // conseguir  canvas y su contexto
+    var canvas = document.getElementById('datos-overlay');
+    var imagen = document.getElementById('dni-image');
+    canvas.width = imagen.width;
+    canvas.height = imagen.height;
+    var contexto = canvas.getContext('2d');
+    var domicilio = document.getElementById("domicilio").value.toUpperCase();
+    localStorage.setItem('domicilio', domicilio);
+    const maxWidth = 362; // Ancho máximo permitido en el canvas
+
+    // Limpiar  canvas
+    contexto.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Tamaño de fuente relativo al ancho de la imagen
+    var fontSize = 16; // Tamaño de la fuente deseado, puedes ajustarlo
+
+    contexto.fillStyle = 'black';
+    contexto.font = 15 + 'px NombreDeTuFuente';
+    contexto.letterSpacing = '2px'; 
+
+    // Coordenadas proporcionales al tamaño de la imagen
+    var xApellido = imagen.width * 0.09;
+    var yApellido = imagen.height * 0.733;
+
+
+    var xNombre = imagen.width * 0.09;
+    var yNombre = imagen.height * 0.815;
+
+ 
+
+    var xsexo = imagen.width * 0.09;
+    var ysexo = imagen.height * 0.897;
+
+    var xdomicilio = imagen.width * 0.04;
+    var ydomicilio = imagen.height * 0.13;
+
+    var xLugarN = imagen.width * 0.04;
+    var yLugarN = imagen.height * 0.19;
+
+
+    var espaciadoEntreLetras = 2; // Define el espaciado entre letras que desees
+
+
+
+      text2 = renglon1;
+    const truncatedText2 = truncateTextToFit2(text2, maxWidth, contexto.font); // Función para truncar el texto
+
+// Esta función trunca el texto si supera el ancho máximo dado
+function truncateTextToFit2(text, maxWidth, font) {
+console.log(text);
+
+    let width = contexto.measureText(text).width;
+    while (width+80 > maxWidth) {
+        text = text.slice(0, -1);
+        width = contexto.measureText(text).width;
+
+    }
+    const additionalChars = "<";
+    while (width+80 + contexto.measureText(additionalChars).width <= maxWidth) {
+        text += additionalChars;
+        width = contexto.measureText(text).width;
+    }
+    return text;
+}
+
+text3 = renglon2;
+    const truncatedText3 = truncateTextToFit3(text3, maxWidth, contexto.font); // Función para truncar el texto
+
+// Esta función trunca el texto si supera el ancho máximo dado
+function truncateTextToFit3(text, maxWidth, font) {
+console.log(text);
+
+    let width = contexto.measureText(text).width;
+    while (width+80 > maxWidth) {
+        text = text.slice(0, -1);
+        width = contexto.measureText(text).width;
+        console.log(text);
+
+    }
+    const additionalChars = "<";
+    while (width+80 + contexto.measureText(additionalChars).width <= maxWidth) {
+        text += additionalChars;
+        width = contexto.measureText(text).width;
+    }
+    return text;
+}
+   
+text4 = renglon3;
+    const truncatedText4 = truncateTextToFit4(text4, maxWidth, contexto.font); // Función para truncar el texto
+
+// Esta función trunca el texto si supera el ancho máximo dado
+function truncateTextToFit4(text, maxWidth, font) {
+console.log(text);
+
+    let width = contexto.measureText(text).width;
+    while (width+80 > maxWidth) {
+        text = text.slice(0, -1);
+        width = contexto.measureText(text).width;
+        console.log(text);
+
+    }
+
+    const additionalChars = "<";
+    while (width+80 + contexto.measureText(additionalChars).width <= maxWidth) {
+        text += additionalChars;
+        width = contexto.measureText(text).width;
+    }
+    return text;
+}
+   
+
+    for (var i = 0; i < truncatedText2.length; i++) {
+    contexto.fillText(truncatedText2[i], xApellido, yApellido);
+    xApellido += contexto.measureText(truncatedText2[i]).width + espaciadoEntreLetras;
+}   
+ for (var i = 0; i < truncatedText3.length; i++) {
+    contexto.fillText(truncatedText3[i], xNombre, yNombre);
+    xNombre += contexto.measureText(truncatedText3[i]).width + espaciadoEntreLetras;
+}    
+for (var i = 0; i < truncatedText4.length; i++) {
+    contexto.fillText(truncatedText4[i], xsexo, ysexo);
+    xsexo += contexto.measureText(truncatedText4[i]).width + espaciadoEntreLetras;
+}
+
+
+
+    contexto.font =  11 + 'px NombreDeTuFuente';
+
+const text = "DOMICILIO: " + domicilio; // Texto a dibujar
+const truncatedText = truncateTextToFit(text, maxWidth, contexto.font); // Función para truncar el texto
+
+// Esta función trunca el texto si supera el ancho máximo dado
+function truncateTextToFit(text, maxWidth, font) {
+    let width = contexto.measureText(text).width;
+
+    while (width > maxWidth) {
+        text = text.slice(0, -1);
+        width = contexto.measureText(text).width;
+    }
+
+    return text;
+}
+
+contexto.fillText(truncatedText, xdomicilio, ydomicilio);
+contexto.font =  9 + 'px NombreDeTuFuente';
+
+contexto.fillText("LUGAR DE NACIMIENTO:", xLugarN, yLugarN);
+
+
+    }
+
+    function guardarImagenEnStorage() {
+    fetch('credenciales.json')
+        .then(response => response.json())
+        .then(config => {
+            const firebaseConfig = config;
+            // Inicializar Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            
+            // Todas las operaciones que dependen de Firebase deben estar aquí dentro
+            // Obtener el nombre del usuario desde localStorage
+            const username = localStorage.getItem('mail');
+            // Obtener la URL de la imagen desde el elemento con ID "dni-image"
+            const imageURL = document.getElementById("dni-image").src;
+
+            if (imageURL && username) {
+                document.getElementById("load").style.display = "block";
+                document.getElementById("todo").style.display = "none";
+                // Realizar una solicitud para obtener la imagen como Blob
+                fetch(imageURL)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        // Crear una referencia al almacenamiento de Firestore
+                        const storageRef = firebase.storage().ref();
+                        // Crear una referencia a la carpeta del usuario
+                        const userFolderRef = storageRef.child(`${username}/`);
+                        // Subir el archivo con el nombre dniFrente
+                        const dniFrenteRef = userFolderRef.child('dniAtras');
+                        // Subir el archivo Blob al almacenamiento de Firestore
+                        dniFrenteRef.put(blob)
+                            .then((snapshot) => {
+                                console.log('Archivo subido correctamente:', snapshot);
+                                window.location.href = "vistaPreviaDni.html"
+                            })
+                            .catch((error) => {
+                                console.error('Error al subir el archivo:', error);
+                            });
+                    })
+                    .catch((error) => {
+                        console.error('Error al obtener la imagen como Blob:', error);
+                    });
+
+                // Obtener el email del usuario
+                var email = localStorage.getItem("mail");
+                // Crear un objeto con todos los datos a guardar
+                var userData = {
+                    domicilio: localStorage.getItem('domicilio'),
+                };
+
+                var db = firebase.firestore(app);
+                db.collection("Usuarios").doc(email).set({
+                    Datos: userData
+                }, { merge: true })
+                .then(function() {
+                    console.log("Datos guardados con éxito en Firestore!");
+                })
+                .catch(function(error) {
+                    console.error("Error al guardar los datos en Firestore: ", error);
+                });
+            } else {
+                console.error('No se encontró la URL de la imagen o el nombre de usuario en el localStorage.');
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar la configuración de Firebase:', error);
+        });
+}
+    </script>
+</body>
+</html>

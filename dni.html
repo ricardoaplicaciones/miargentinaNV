@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNI Digital Header</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+</head>
+<style>
+    body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    background-color: #337ab7;
+    padding: 10px;
+    color: white;
+    justify-content: space-between;
+    height: 40px;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+}
+
+.icon {
+    font-size: 24px;
+}
+
+.title {
+    font-size: 20px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.icon-img {
+    width: 45px;
+    height: 45px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 340px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.card-image img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.card-details {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.card-details p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.card-actions:first-of-type {
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.action-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 5px;
+}
+
+.action span {
+    font-size: 15px;
+    color: black;
+}
+.footer {
+            background-color: white;
+            padding: 10px 0px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #ccc;
+        }
+.footer img {
+            width: 40px;
+            height: 40px;
+}
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #337ab7;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin-top: 100px;
+    }
+
+    @keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+    } 
+</style>
+<body>
+    <header class="header">
+        <span onclick="atras()" class="icon">&larr;</span>
+        <span class="title">DNI Digital</span>
+        <img src="img/refresh.png" alt="Refresh" class="icon-img">
+    </header>
+    <div id="cardEntera" style="display: none;">
+     <center style="padding-top: 20px;"><div class="card">
+        <div class="card-image">
+            <p id="nombre" style="margin-top: 0px;margin-bottom: 10px; font-weight: bold;text-align: left; "></p>
+            <section class="u-clearfix Bu-section-2" id="sec-8eb5">
+                <div class="u-clearfix u-sheet Bu-sheet-1">
+                  <div class ="tarjeta">
+                    <img id="imagen1" class="u-image u-image-default Bu-image-1 dni-image" src="" data-image-width="900" data-image-height="578" onclick="cambiarImagen()">
+                    <img id="imagen2" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/2.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen3" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/3.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen4" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/4.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen5" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/5.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen6" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/6.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen7" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/7.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen8" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/8.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen9" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/9.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
+                    <img id="imagen10" class="u-image u-image-default Bu-image-1 dni-image" src=""  data-image-width="490" data-image-height="312" style="display: none;" onclick="cambiarImagen2()">
+                  </div>
+                  <img class="u-image u-image-contain u-image-default Bu-image-2" src="images/detallesdni.PNG" alt="" data-image-width="314" data-image-height="99">
+                </div>
+          
+              </section>        </div>
+        <div class="card-details">
+            <p id="update-time">Última actualización: --/--/---- --:--:-- hs</p>
+            <div class="card-actions">
+                <div class="action">
+                    <img src="img/ver.PNG" alt="Ver detalle" class="action-icon">
+                    <span onclick="verDetalles()">Ver detalle</span>
+                </div>
+                <div class="action">
+                    <img src="img/cruz.PNG" alt="Desactivar DNI" class="action-icon">
+                    <span>Desactivar DNI</span>
+                </div>
+            </div>
+            <div class="card-actions">
+                <div class="action">
+                    <img src="img/qr.PNG" alt="Verifica código QR" class="action-icon">
+                    <span>Verifica código QR</span>
+                </div>
+            </div>
+        </div>
+     </div></center>
+    </div>
+    <center><span id="loader" class="loader"></span></center>
+    <div class="footer">
+        <img src="img/inicio.PNG" alt="Inicio">
+        <img style="width: 60px; height: 43px;" src="img/novedades.PNG" alt="Novedades">
+        <img style="width: 50px;" src="img/telefonos.PNG" alt="Teléfonos">
+        <img src="img/tina.PNG" alt="Tina">
+    </div>
+
+
+    <script>
+        function verDetalles() {
+            window.location.href = "dniDetalles.html"
+        }
+        function atras() {
+            window.location.href="verDni.html"
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+    const updateTimeElement = document.getElementById('update-time');
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds} hs`;
+    updateTimeElement.textContent = `Última actualización: ${formattedDateTime}`;
+});
+
+    </script>
+
+    <script>
+function inicializarFirebaseYRealizarOperaciones() {
+    fetch('credenciales.json')
+        .then(response => response.json())
+        .then(config => {
+            const firebaseConfig = config;
+            // Inicializar Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            const storage = firebase.storage();
+            const db = firebase.firestore(app);
+
+            // Obtener el email del usuario
+            const email = localStorage.getItem('mail');
+            if (!email) {
+                console.error('No se encontró el email del usuario en el localStorage.');
+                return;
+            }
+
+            // Obtener datos del usuario desde Firestore
+            db.collection("Usuarios").doc(email).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        document.getElementById("nombre").innerHTML = userData.Datos.nombre;
+                        terminoCargar();
+                        // Aquí puedes manejar los datos del usuario como desees
+                    } else {
+                        console.log("No se encontró el documento del usuario.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al obtener los datos del usuario:", error);
+                });
+
+            // Obtener URLs de las imágenes desde Firebase Storage
+            var nombreArchivo1 = "dniFrente";
+            var nombreArchivo2 = "dniAtras";
+            const storageRef = storage.ref().child(email);
+
+            const archivoRef1 = storageRef.child(nombreArchivo1);
+            const archivoRef2 = storageRef.child(nombreArchivo2);
+
+            archivoRef1.getDownloadURL()
+                .then((url1) => {
+                    console.log('URL del archivo 1:', url1);
+                    document.getElementById("imagen1").src = url1;
+                })
+                .catch((error) => {
+                    console.error('Error al obtener la URL del archivo 1:', error);
+                    archivoRef1.parent.child("dniFrente.png").getDownloadURL()
+                        .then((fallbackUrl1) => {
+                            console.log('URL del archivo 1 (fallback):', fallbackUrl1);
+                            document.getElementById("imagen1").src = fallbackUrl1;
+                        })
+                        .catch((fallbackError1) => {
+                            console.error('Error al obtener la URL del archivo 1 (fallback):', fallbackError1);
+                        });
+                });
+
+            archivoRef2.getDownloadURL()
+                .then((url2) => {
+                    console.log('URL del archivo 2:', url2);
+                    document.getElementById("imagen10").src = url2;
+                })
+                .catch((error) => {
+                    console.error('Error al obtener la URL del archivo 2:', error);
+                });
+        })
+        .catch(error => {
+            console.error('Error al cargar la configuración de Firebase:', error);
+        });
+}
+
+// Llamar a la función para realizar todas las operaciones al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarFirebaseYRealizarOperaciones();
+});
+
+        
+        
+                var imagenes = ['imagen1', 'imagen2', 'imagen3','imagen4', 'imagen5','imagen6', 'imagen7','imagen8', 'imagen9','imagen10'];
+        var indiceActual = 0;
+        var tiempoEspera = 14; // en milisegundos
+        var primVez = true;
+        
+        
+        var startX, startY;
+        var lastChangeTime = 0; // variable para guardar el tiempo de la última llamada a cambiarImagen3()
+        
+        function handleTouchStart(event) {
+          startX = event.touches[0].pageX;
+          startY = event.touches[0].pageY;
+          }
+        
+        function handleTouchMove3(event) {
+          var currentTime = new Date().getTime(); // obtener el tiempo actual
+          if (currentTime - lastChangeTime < 100) { // no llamar a cambiarImagen3() si han pasado menos de 500 milisegundos
+            return;
+          }
+          lastChangeTime = currentTime; // actualizar el tiempo de la última llamada
+          var touchX = event.touches[0].pageX;
+          var touchY = event.touches[0].pageY;
+          var deltaX = startX - touchX;
+          var deltaY = startY - touchY;
+          if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX > 20 ) {
+              cambiarImagen();
+        
+            }
+          }
+        }
+        function handleTouchMove4(event) {
+          var currentTime = new Date().getTime(); // obtener el tiempo actual
+          if (currentTime - lastChangeTime < 400) { // no llamar a cambiarImagen3() si han pasado menos de 500 milisegundos
+            return;
+          }
+          lastChangeTime = currentTime; // actualizar el tiempo de la última llamada
+          var touchX = event.touches[0].pageX;
+          var touchY = event.touches[0].pageY;
+          var deltaX = startX - touchX;
+          var deltaY = startY - touchY;
+          if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX<20) {
+              cambiarImagen2();
+            }
+          }
+        }
+        
+        var myImage3 = document.getElementById("imagen1");
+              myImage3.addEventListener("touchstart", handleTouchStart, false);
+              myImage3.addEventListener("touchmove", handleTouchMove3, false);
+        
+              var myImage4 = document.getElementById("imagen10");
+              myImage4.addEventListener("touchstart", handleTouchStart, false);
+              myImage4.addEventListener("touchmove", handleTouchMove4, false);
+        
+        
+        
+        function cambiarImagen() {
+          if (indiceActual < imagenes.length) {
+            document.getElementById(imagenes[indiceActual]).style.display = 'none'; // ocultar la imagen actual
+            indiceActual++;
+            if (indiceActual == imagenes.length) {
+            document.getElementById(imagenes[imagenes.length-1]).style.display = 'inline'; // mostrar la siguiente imagen
+            return; // detener la secuencia si se llegó al final
+            }
+          document.getElementById(imagenes[indiceActual]).style.display = 'inline'; // mostrar la siguiente imagen
+          setTimeout(cambiarImagen, tiempoEspera);
+          } 
+        }
+        
+        
+        function cambiarImagen2() {
+          if (primVez==true) {
+          indiceActual = imagenes.length - 1;
+            primVez = false;
+          }
+          document.getElementById(imagenes[indiceActual]).style.display = 'none';
+          indiceActual--;
+          if (indiceActual < 0) {
+            document.getElementById(imagenes[0]).style.display = 'inline'; // mostrar la siguiente imagen
+            indiceActual= 0;
+            primVez = true;
+            return; // detener la secuencia si se llegó al final
+        
+          }
+          document.getElementById(imagenes[indiceActual]).style.display = 'inline';
+          setTimeout(cambiarImagen2, tiempoEspera);
+        }
+        function terminoCargar() {
+            document.getElementById("cardEntera").style.display = "block";
+            document.getElementById("loader").style.display = "none";
+        }
+        </script>
+</body>
+</html>

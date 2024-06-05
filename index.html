@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>miArgentina</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f2f2f2;
+        }
+        .header {
+            background-color: #00ADEF;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 13px;
+            border-bottom-right-radius: 13px;
+        }
+        .menu-icon {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .menu-icon div {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 2px 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .header .user-info img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .welcome {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .welcome h2 {
+            margin: 0;
+        }
+        .appointment {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .appointment img {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .appointment p {
+            margin: 0;
+            flex-grow: 1;
+            padding-left: 70px; /* Adjusting padding to make space for the image */
+            text-align: left;
+        }
+        .appointment button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            width: 80%;
+            margin-left: 60px;
+        }
+        .services {
+            margin-top: 20px;
+        }
+        .services h3 {
+            margin: 0 0 10px 0;
+            text-align: left;
+        }
+        .services p {
+            font-size: small;
+            font-weight: bold;
+        }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .service img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1px;
+            border-radius: 15%;
+        }
+        .footer {
+            background-color: white;
+            padding: 10px 0px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #ccc;
+        }
+        .footer img {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu-icon">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <h1><span style="color: black;">mi</span><span style="color: white;">Argentina</span></h1>        <div class="user-info">
+            <img src="img/user.png" alt="User Avatar">
+        </div>
+    </div>
+    <div class="content">
+        <div class="appointment">
+            <img src="img/turno.PNG" alt="Appointment Icon">
+            <div>
+                <strong><p style="font-size:medium">No tenés turnos programados.</p></strong>
+                <button>Solicitalo acá</button>
+            </div>
+        </div>
+        <div class="services">
+            <h3>Mis servicios</h3>
+            <div class="service-grid">
+                <div onclick="dni()" class="service">
+                    <img src="img/misDocumentos.PNG" alt="Mis Documentos">
+                    <p>Mis documentos</p>
+                </div>
+                <div class="service">
+                    <img src="img/misVehiculos.PNG" alt="Mis Vehículos">
+                    <p>Mis vehículos</p>
+                </div>
+                <div class="service">
+                    <img src="img/miSalud.PNG" alt="Mi Salud">
+                    <p>Mi salud</p>
+                </div>
+                <div class="service">
+                    <img src="img/miTrabajo.PNG" alt="Mi Trabajo">
+                    <p>Mi trabajo</p>
+                </div>
+                <div class="service">
+                    <img src="img/misTurnos.PNG" alt="Mis Turnos">
+                    <p>Mis turnos</p>
+                </div>
+                <div class="service">
+                    <img src="img/misCobros.PNG" alt="Mis Cobros">
+                    <p>Mis cobros</p>
+                </div>
+                <div class="service">
+                    <img src="img/misTramites.PNG" alt="Mis Trámites">
+                    <p>Mis trámites</p>
+                </div>
+                <div class="service">
+                    <img src="img/misHijos.PNG" alt="Mis Hijos">
+                    <p>Mis hijos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <img src="img/inicio.PNG" alt="Inicio">
+        <img style="width: 60px; height: 43px;" src="img/novedades.PNG" alt="Novedades">
+        <img style="width: 50px;" src="img/telefonos.PNG" alt="Teléfonos">
+        <img src="img/tina.PNG" alt="Tina">
+    </div>
+    <script>
+        function dni() {
+            window.location.href= "verDni.html"
+        }
+    </script>
+</body>
+</html>
