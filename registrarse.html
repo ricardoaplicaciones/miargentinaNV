@@ -140,7 +140,7 @@ button:hover {
             window.location.href = "iniciarSesion.html"
         }
         
-        fetch('fonts.json')
+        fetch('credenciales.json')
             .then(response => response.json())
             .then(config => {
                 const firebaseConfig = config;
@@ -169,7 +169,9 @@ button:hover {
                     mail: mail,
                     contrasenia:contrasenia,
                     activado:false,
-                    creacion:fechaActual
+                    creacion:fechaActual,
+                    fechaActivacion24horas:"19/04/2022",
+                    fechaActivacion30dias:"19/04/2022",
             }
 
             const usuariosRef = db.collection('Usuarios');
