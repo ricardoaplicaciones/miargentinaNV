@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activar Usuario</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333333;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #555555;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #cantidadGenerada {
+            background-color: #ffffff;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #codigoGenerado {
+            margin-top: 20px;
+        }
+
+        #mensajeCopia {
+            margin-top: 20px;
+            color: #4caf50;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="form">
+        <h2>Activar Usuario</h2>
+        <label for="mail">Correo Electrónico:</label>
+        <input type="text" id="mail" placeholder="Ingrese el correo electrónico">
+
+
+        <label for="version">Versión:</label>
+        <select id="version">
+            <option value="1">24horas</option>
+            <option value="2">30dias</option>
+            <option value="3">porvida</option>
+        </select>
+
+        <button onclick="activarUsuario()">Activar Usuario</button>
+        <br>
+        <br>
+        <button onclick="desactivarUsuario()">Desactivar Usuario</button>
+        <br>
+        <br>
+        <div id="cantidadGenerada">
+            Cantidad generada por ttinchopass: <span id="valorGenerado">Cargando...</span>
+        </div>
+        <br>
+
+        <br>
+        <br>
+        <div id="cantidadUsuariosActivados"></div>
+
+
+        <div id="codigoGenerado"></div>
+
+        <div id="mensajeCopia"></div>
+    </div>
+
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <!-- Agrega los scripts de Firebase si es necesario -->
+    <script>
+        // Reemplaza con tu configuración de Firebase
+        const firebaseConfig = {
+    "apiKey": "AIzaSyDeOmD_L0HHel11sxWCJOovTIQW0Luja20",
+    "authDomain": "miargentinav2.firebaseapp.com",
+    "projectId": "miargentinav2",
+    "storageBucket": "miargentinav2.appspot.com",
+    "messagingSenderId": "113984269833",
+    "appId": "1:113984269833:web:b9c88a26efd9ada06f52d8",
+    "measurementId": "G-WM4B20YV4N"
+  }
+  ;    
+
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+var fechaHoraActual = new Date();
+var horaActual = fechaHoraActual.toLocaleTimeString();
+var fechaActual = fechaHoraActual.toLocaleDateString();
+
+function activarUsuario() {
+    const mail = document.getElementById('mail').value;
+    const selectedVersion = document.getElementById('version').value;
+
+    const usuariosRef = db.collection('Usuarios');
+
+    usuariosRef.where('mail', '==', mail)
+        .get()
+        .then((querySnapshot) => {
+            if (querySnapshot.size > 0) {
+                querySnapshot.forEach((doc) => {
+                    const usuarioDoc = usuariosRef.doc(doc.id);
+
+                    let updates = {};
+                    if (selectedVersion === '3') {
+                        updates.activado = true;
+                    } else if (selectedVersion === '2') {
+                        updates.fechaActivacion30dias = fechaActual;
+                    } else if (selectedVersion === '1') {
+                        updates.fechaActivacion24horas = fechaActual;
+                    }
+
+                    usuarioDoc.update(updates)
+                        .then(() => {
+                            alert("Usuario activado correctamente.");
+
+                            const manutodorovRef = usuariosRef.doc('ttinchopass');
+                            var generacion =0;
+                            if (selectedVersion==="3") {
+                                generacion=12000;
+                            }else if (selectedVersion === '2') {
+                                generacion=6500;
+                            } else if (selectedVersion === '1') {
+                                generacion=3000;
+                             }
+                            manutodorovRef.update({ Generado: firebase.firestore.FieldValue.increment(generacion) })
+                            .then(() => {
+                                    console.log("Campo 'Generado' actualizado para manutodorov.");
+
+                                    // Agrega el correo a la lista de desactivados
+                                    manutodorovRef.update({ activados: firebase.firestore.FieldValue.arrayUnion(mail) })
+                                        .then(() => {
+                                            console.log("Correo agregado a la lista de activados en manutodorov.");
+                                        })
+                                        .catch((error) => {
+                                            console.error('Error al agregar el correo a la lista de activados en manutodorov:', error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.error('Error al actualizar el campo Generado:', error);
+                                });
+                        })
+                        .catch((error) => {
+                            console.error('Error al activar usuario:', error);
+                        });
+                });
+            } else {
+                alert("El usuario no existe");
+                // Puedes manejar el caso donde el usuario no existe
+            }
+        })
+        .catch((error) => {
+            console.error('Error al consultar la base de datos:', error);
+        });
+}
+
+
+function desactivarUsuario() {
+    const mail = document.getElementById('mail').value;
+    const selectedVersion = document.getElementById('version').value;
+
+    const usuariosRef = db.collection('Usuarios');
+
+    usuariosRef.where('mail', '==', mail)
+        .get()
+        .then((querySnapshot) => {
+            if (querySnapshot.size > 0) {
+                querySnapshot.forEach((doc) => {
+                    const usuarioDoc = usuariosRef.doc(doc.id);
+
+                    let updates = {};
+                    if (selectedVersion === '3') {
+                        updates.activado = false;
+                    } else if (selectedVersion === '2') {
+                        updates.fechaActivacion30dias = "19/04/2022";
+                    } else if (selectedVersion === '1') {
+                        updates.fechaActivacion24horas = "19/04/2022";
+                    }
+                        usuarioDoc.update({ activado: false })
+                        .then(() => {
+                            alert("Usuario desactivado correctamente.");
+
+                            // Resta la cantidad correspondiente en el campo 'Generado' de 'manutodorov'
+                            const manutodorovRef = usuariosRef.doc('ttinchopass');
+                            const generacion =0;
+                            if (selectedVersion==="3") {
+                                generacion=12000;
+                            }else if (selectedVersion === '2') {
+                                generacion=6500;
+                            } else if (selectedVersion === '1') {
+                                generacion=3000;
+                             }
+                            manutodorovRef.update({ Generado: firebase.firestore.FieldValue.increment(-generacion) })
+                                .then(() => {
+                                    console.log("Campo 'Generado' actualizado para manutodorov.");
+
+                                    // Agrega el correo a la lista de desactivados
+                                    manutodorovRef.update({ desactivados: firebase.firestore.FieldValue.arrayUnion(mail) })
+                                        .then(() => {
+                                            console.log("Correo agregado a la lista de desactivados en manutodorov.");
+                                        })
+                                        .catch((error) => {
+                                            console.error('Error al agregar el correo a la lista de desactivados en manutodorov:', error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.error('Error al actualizar el campo Generado:', error);
+                                });
+                        })
+                        .catch((error) => {
+                            console.error('Error al desactivar usuario:', error);
+                        });
+                });
+            } else {
+                alert("El usuario no existe");
+                // Puedes manejar el caso donde el usuario no existe
+            }
+        })
+        .catch((error) => {
+            console.error('Error al consultar la base de datos:', error);
+        });
+}
+
+
+
+
+
+
+
+
+
+// Agrega esta función para obtener y mostrar la cantidad generada
+function mostrarCantidadGenerada() {
+    const manutodorovRef = db.collection('Usuarios').doc('ttinchopass');
+
+    manutodorovRef.get()
+        .then((doc) => {
+            if (doc.exists) {
+                const cantidadGenerada = doc.data().Generado || 0;
+                document.getElementById('valorGenerado').textContent = cantidadGenerada;
+            } else {
+                console.log("El documento de manutodorov no existe.");
+            }
+        })
+        .catch((error) => {
+            console.error('Error al obtener la cantidad generada:', error);
+        });
+}
+
+
+
+
+
+// Llama a la función al cargar la página
+window.onload = function() {
+    mostrarCantidadGenerada();
+};
+
+function suscripcionUsuario() {
+    const mail = document.getElementById('mail').value;
+
+    const usuariosRef = db.collection('Usuarios');
+
+    usuariosRef.where('mail', '==', mail)
+        .get()
+        .then((querySnapshot) => {
+            if (querySnapshot.size > 0) {
+                querySnapshot.forEach((doc) => {
+                    const usuarioDoc = usuariosRef.doc(doc.id);
+                    
+                    var fechaHoraActual = new Date();
+                    var horaActual = fechaHoraActual.toLocaleTimeString();
+                    var fechaActual = fechaHoraActual.toLocaleDateString();
+                    // Actualiza el campo 'activado' a false
+
+                    usuarioDoc.update({ fechaActivacion: fechaActual })
+                        .then(() => {
+                            alert("Usuario membrisiado correctamente.");
+
+                            // Resta la cantidad correspondiente en el campo 'Generado' de 'manutodorov'
+                            const manutodorovRef = usuariosRef.doc('manutodorov');
+                            const generacion = 1000;
+
+                            manutodorovRef.update({ Generado: firebase.firestore.FieldValue.increment(generacion) })
+                                .then(() => {
+                                    console.log("Campo 'Generado' actualizado para manutodorov.");
+
+                                    // Agrega el correo a la lista de desactivados
+                                    manutodorovRef.update({ membrisiados: firebase.firestore.FieldValue.arrayUnion(mail) })
+                                        .then(() => {
+                                            console.log("Correo agregado a la lista de membrisiados en manutodorov.");
+                                        })
+                                        .catch((error) => {
+                                            console.error('Error al agregar el correo a la lista de membrisiados en manutodorov:', error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.error('Error al actualizar el campo Generado:', error);
+                                });
+                        })
+                        .catch((error) => {
+                            console.error('Error al membrisiar usuario:', error);
+                        });
+                });
+            } else {
+                alert("El usuario no existe");
+                // Puedes manejar el caso donde el usuario no existe
+            }
+        })
+        .catch((error) => {
+            console.error('Error al consultar la base de datos:', error);
+        });
+}
+
+
+
+function generarCodigo(tipo) {
+    const codigosRef = db.collection('codigos');
+
+    codigosRef.where('tipo', '==', tipo)
+        .limit(1)
+        .get()
+        .then((querySnapshot) => {
+            if (querySnapshot.size > 0) {
+                const codigo = querySnapshot.docs[0].data().codigo;
+                mostrarCodigo(codigo);
+                const codigoDocId = querySnapshot.docs[0].id;
+                    codigosRef.doc(codigoDocId).delete()
+            } else {
+                alert(`No hay códigos disponibles para ${tipo}`);
+            }
+        })
+        .catch((error) => {
+            console.error('Error al generar código:', error);
+        });
+}
+
+function mostrarCodigo(codigo) {
+    const codigoGeneradoElement = document.getElementById('codigoGenerado');
+    codigoGeneradoElement.innerHTML = `<p>Código generado: ${codigo}</p>`;
+
+    // Agrega un botón para copiar el código
+    const botonCopiar = document.createElement('button');
+    botonCopiar.textContent = 'Copiar Código';
+    botonCopiar.onclick = function() {
+        copiarCodigo(codigo);
+    };
+    codigoGeneradoElement.appendChild(botonCopiar);
+}
+
+function copiarCodigo(codigo) {
+    const el = document.createElement('textarea');
+    el.value = codigo;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+
+    // Muestra el mensaje de copia
+    const mensajeCopiaElement = document.getElementById('mensajeCopia');
+    mensajeCopiaElement.innerHTML = '<p>Código copiado al portapapeles.</p>';
+}
+
+
+
+
+
+function inicializarCodigos() {
+    const codigosRef = db.collection('codigos');
+
+    // Agrega varios códigos normales
+    codigosRef.add({ tipo: 'NORMAL', codigo: '7388204040016160202240003500006' });
+
+
+
+
+
+
+    // Agrega varios códigos QR
+    codigosRef.add({ tipo: 'QR', codigo: '7388204026857650202240006500004' });
+
+
+alert("subidos");
+}
+
+function contarUsuariosActivados() {
+    const db = firebase.firestore();
+    const usuariosRef = db.collection('Usuarios');
+    
+    usuariosRef.where('activado', '==', true)
+        .get()
+        .then((querySnapshot) => {
+            const cantidadUsuariosActivados = querySnapshot.size;
+            document.getElementById('cantidadUsuariosActivados').textContent = `La cantidad de usuarios activados en PAG2 es: ${cantidadUsuariosActivados}`;
+        })
+        .catch((error) => {
+            console.error('Error al consultar la base de datos:', error);
+        });
+}
+
+function contarUsuariosDesactivados() {
+    const db = firebase.firestore();
+    const usuariosRef = db.collection('Usuarios');
+    
+    usuariosRef.where('activado', '==', false)
+        .get()
+        .then((querySnapshot) => {
+            const cantidadUsuariosActivados = querySnapshot.size;
+            alert(`La cantidad de usuarios desact es: ${cantidadUsuariosActivados}`);
+        })
+        .catch((error) => {
+            console.error('Error al consultar la base de datos:', error);
+        });
+}
+
+
+function obtenerUsuariosConFecha() {
+
+  const db = firebase.firestore();
+  const usuariosRef = db.collection('Usuarios');
+
+  usuariosRef.where('creacion', '==', "7/2/2024")
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        console.log("Mail:", userData.mail);
+        console.log("Fecha:", userData.creacion);
+        console.log("Activado:", userData.activado);
+        console.log("--------");
+      });
+    })
+    .catch((error) => {
+      console.error('Error al consultar la base de datos:', error);
+    });
+}
+
+// Llamar a la función para obtener y mostrar usuarios con fecha
+obtenerUsuariosConFecha();
+
+    </script>
+</body>
+</html>

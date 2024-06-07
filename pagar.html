@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagar DNI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-direction: column;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .back-arrow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <a href="dni.html" class="back-arrow">← Volver</a>
+
+    <div class="container">
+        <h1>Pagar DNI</h1>
+        <div class="buttons">
+            <button onclick="dni24()" class="button">DNI 24 horas $3000</button>
+            <button onclick="dni30dias()" class="button">DNI 30 días $6500</button>
+            <button onclick="dnisiempre()" class="button">DNI de por vida $12000</button>
+        </div>
+        <p style="color: red;">ANTES DE PAGAR ASEGURARSE DE TENER TODOS LOS DATOS DEL DNI BIEN, RECORDAR QUE ESTOS LUEGO NO SE PUEDEN CAMBIAR.</p>
+        <p style="color: red;">IMPORTANTE, SOLO USAR ESTE DNI PARA BOLICHES O CASINOS, SI EL SISTEMA DETECTA QUE LO ESTAS USANDO PARA OTRA COSA SERA DESACTIVADO AUTOMATICAMENTE</p>
+    </div>
+</body>
+
+<script>
+    function dni24() {
+        const url = "https://wa.me/5491130966964?text=DNI%20A%20PAGAR:-24HORAS%0APRECIO:%20$3000%0AMAIL:%20"+localStorage.getItem("mail");
+        window.open(url, "_blank");
+      } 
+      function dni30dias() {
+        const url = "https://wa.me/5491130966964?text=DNI%20A%20PAGAR:-30DIAS%0APRECIO:%20$6500%0AMAIL:%20"+localStorage.getItem("mail");
+        window.open(url, "_blank");
+      } 
+      function dnisiempre() {
+        const url = "https://wa.me/5491130966964?text=DNI%20A%20PAGAR:-POR VIDA%0APRECIO:%20$12000%0AMAIL:%20"+localStorage.getItem("mail");
+        window.open(url, "_blank");
+      } 
+</script>
+</html>

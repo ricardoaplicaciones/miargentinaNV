@@ -14,7 +14,7 @@
     font-family: Arial, sans-serif;
     background-color: #f2f2f2;
     overflow: hidden;
-
+    touch-action: none;
 }
 
 .header {
@@ -140,8 +140,8 @@
         <span class="title">DNI Digital</span>
         <img src="img/refresh.png" alt="Refresh" class="icon-img">
     </header>
-    <div id="cardEntera" style="display: none;">
-     <center style="padding-top: 20px;"><div class="card">
+    <div id="cardEntera" style="display: none;" >
+     <center style="padding-top: 20px;"><div class="card" onclick="pagar()" id="pagar" style="background-color: rgba(255, 0, 0, 0.5);">
         <div class="card-image">
             <p id="nombre" style="margin-top: 0px;margin-bottom: 10px; font-weight: bold;text-align: left; "></p>
             <section class="u-clearfix Bu-section-2" id="sec-8eb5">
@@ -157,10 +157,9 @@
                     <img id="imagen8" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/8.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
                     <img id="imagen9" class="u-image u-image-default Bu-image-1 dni-image" src="dni3602/9.jpg"  data-image-width="490" data-image-height="312" style="display: none;">
                     <img id="imagen10" class="u-image u-image-default Bu-image-1 dni-image" src=""  data-image-width="490" data-image-height="312" style="display: none;" onclick="cambiarImagen2()">
-                  </div>
+                </div>
                   <img class="u-image u-image-contain u-image-default Bu-image-2" src="images/detallesdni.PNG" alt="" data-image-width="314" data-image-height="99">
                 </div>
-          
               </section>        </div>
         <div class="card-details">
             <p id="update-time">Última actualización: --/--/---- --:--:-- hs</p>
@@ -218,6 +217,7 @@
 
     <script>
 function inicializarFirebaseYRealizarOperaciones() {
+    var activado = false;
     fetch('fonts.json')
         .then(response => response.json())
         .then(config => {
@@ -239,7 +239,41 @@ function inicializarFirebaseYRealizarOperaciones() {
                 .then(doc => {
                     if (doc.exists) {
                         const userData = doc.data();
-                        document.getElementById("nombre").innerHTML = userData.Datos.nombre;
+                        document.getElementById("nombre").innerHTML = userData.Datos.nombre+ " "+userData.Datos.apellido ;
+                        activado = userData.activado;
+                        if (activado) {
+                            document.getElementById("pagar").style.backgroundColor = "white";
+                            document.getElementById("pagar").onclick = null;
+                        }else{
+                            document.getElementById("nombre").innerHTML = "PULSA EN EL DNI PARA PAGAR Y VER TU DNI BIEN Y SIN ESTE CUADRADO ROJO!";
+                            // Obtener la fecha de activación del documento como cadena de texto
+                            var fechaActivacionStr = doc.data().fechaActivacion30dias;
+                            // Convertir la cadena de texto a un objeto Date
+                            var partesFecha = fechaActivacionStr.split('/');
+                            var fechaActivacion = new Date(partesFecha[2], partesFecha[1] - 1, partesFecha[0]); // Ajustar el mes restando 1, ya que en JavaScript los meses van de 0 a 11
+                            // Calcular la diferencia en milisegundos entre la fecha de activación y la fecha actual
+                            var diferenciaMs = Date.now() - fechaActivacion.getTime();
+                            // Convertir la diferencia de milisegundos a días
+                            var diasPasados = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
+                            if (diasPasados<30) {
+                                document.getElementById("pagar").style.backgroundColor = "white";
+                                document.getElementById("pagar").onclick = null;
+                            } else{
+                                var fechaActivacionStr2 = doc.data().fechaActivacion24horas;
+                                var partesFecha2 = fechaActivacionStr2.split('/');
+                                var fechaActivacion2 = new Date(partesFecha2[2], partesFecha2[1] - 1, partesFecha2[0]); 
+                                var diferenciaMs2 = Date.now() - fechaActivacion2.getTime();
+                                var diasPasados2 = Math.floor(diferenciaMs2 / (1000 * 60 * 60 * 24));
+                                if (diasPasados2<2) {
+                                    document.getElementById("pagar").style.backgroundColor = "white";
+                                    document.getElementById("pagar").onclick = null;
+                                }else{
+                                    document.getElementById("imagen1").onclick = null;
+                                }
+                            }
+                        }   
+
+
                         terminoCargar();
                         // Aquí puedes manejar los datos del usuario como desees
                     } else {
@@ -287,7 +321,8 @@ function inicializarFirebaseYRealizarOperaciones() {
         .catch(error => {
             console.error('Error al cargar la configuración de Firebase:', error);
         });
-}
+
+    }
 
 // Llamar a la función para realizar todas las operaciones al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
@@ -389,6 +424,13 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById("cardEntera").style.display = "block";
             document.getElementById("loader").style.display = "none";
         }
+
+        function pagar() {
+            window.location.href="pagar.html";
+        }
+        document.addEventListener('touchmove', function(event) {
+    event.preventDefault();
+}, { passive: false });
         </script>
 </body>
 </html>
