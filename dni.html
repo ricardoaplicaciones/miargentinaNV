@@ -245,7 +245,6 @@ function inicializarFirebaseYRealizarOperaciones() {
                             document.getElementById("pagar").style.backgroundColor = "white";
                             document.getElementById("pagar").onclick = null;
                         }else{
-                            document.getElementById("nombre").innerHTML = "PULSA EN EL DNI PARA PAGAR Y VER TU DNI BIEN Y SIN ESTE CUADRADO ROJO!";
                             // Obtener la fecha de activación del documento como cadena de texto
                             var fechaActivacionStr = doc.data().fechaActivacion30dias;
                             // Convertir la cadena de texto a un objeto Date
@@ -269,6 +268,7 @@ function inicializarFirebaseYRealizarOperaciones() {
                                     document.getElementById("pagar").onclick = null;
                                 }else{
                                     document.getElementById("imagen1").onclick = null;
+                                    document.getElementById("nombre").innerHTML = "PULSA EN EL DNI PARA PAGAR Y VER TU DNI BIEN Y SIN ESTE CUADRADO ROJO!";
                                 }
                             }
                         }   
