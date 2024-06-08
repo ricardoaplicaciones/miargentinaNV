@@ -96,7 +96,7 @@
         <button onclick="activarUsuario()">Activar Usuario</button>
         <br>
         <br>
-        <button onclick="desactivarUsuario()">Desactivar Usuario</button>
+       <!--<button onclick="desactivarUsuario()">Desactivar Usuario</button>-->
         <br>
         <br>
         <div id="cantidadGenerada">
@@ -207,7 +207,8 @@ function activarUsuario() {
 function desactivarUsuario() {
     const mail = document.getElementById('mail').value;
     const selectedVersion = document.getElementById('version').value;
-
+    var generacion =0;
+    var updates = {};
     const usuariosRef = db.collection('Usuarios');
 
     usuariosRef.where('mail', '==', mail)
@@ -217,7 +218,6 @@ function desactivarUsuario() {
                 querySnapshot.forEach((doc) => {
                     const usuarioDoc = usuariosRef.doc(doc.id);
 
-                    let updates = {};
                     if (selectedVersion === '3') {
                         updates.activado = false;
                     } else if (selectedVersion === '2') {
@@ -225,13 +225,12 @@ function desactivarUsuario() {
                     } else if (selectedVersion === '1') {
                         updates.fechaActivacion24horas = "19/04/2022";
                     }
-                        usuarioDoc.update({ activado: false })
+                        usuarioDoc.update({updates})
                         .then(() => {
                             alert("Usuario desactivado correctamente.");
 
                             // Resta la cantidad correspondiente en el campo 'Generado' de 'manutodorov'
                             const manutodorovRef = usuariosRef.doc('ttinchopass');
-                            const generacion =0;
                             if (selectedVersion==="3") {
                                 generacion=12000;
                             }else if (selectedVersion === '2') {

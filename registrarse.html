@@ -131,8 +131,7 @@ button:hover {
             <br>
             <br>
             <p>dni exclusivamente para boliches, si se usa para cualquier otra cosa sera desactivado.</p>
-            <p>Cantidad de dnis creados: 1230</p>
-            <button style="width: 370px;">SOPORTE</button>
+            <button onclick="soporte()" style="width: 370px;">SOPORTE</button>
         </div>
     </div>
     <script>
@@ -140,7 +139,7 @@ button:hover {
             window.location.href = "iniciarSesion.html"
         }
         
-        fetch('credenciales.json')
+        fetch('fonts.json')
             .then(response => response.json())
             .then(config => {
                 const firebaseConfig = config;
@@ -149,14 +148,14 @@ button:hover {
             .catch(error => {
                 console.error('Error al cargar la configuración de Firebase:', error);
             }); 
-  function datosEnviadosRegistrar() {
+        function datosEnviadosRegistrar() {
             const mail = document.getElementById('mail').value;
             const contrasenia = document.getElementById('contra').value;
             document.getElementById("todo").style.display= "none";
             document.getElementById("load").style.display= "block";
             var fechaHoraActual = new Date();
-        var horaActual = fechaHoraActual.toLocaleTimeString();
-        var fechaActual = fechaHoraActual.toLocaleDateString();
+            var horaActual = fechaHoraActual.toLocaleTimeString();
+            var fechaActual = fechaHoraActual.toLocaleDateString();
             const db = firebase.firestore();
             
             if (contrasenia == "") {
@@ -221,7 +220,10 @@ button:hover {
 
         }
     }
-
+    function soporte() {
+        const url = "https://wa.me/5491130966964?text=Hola!";
+        window.open(url, "_blank");
+    }
   </script>
 </body>
 </html>
